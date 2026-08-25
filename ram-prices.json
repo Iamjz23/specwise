@@ -1,0 +1,10 @@
+﻿{
+  "updated": "2026-05-13T12:00:00Z",
+  "currency": "CAD",
+  "note": "Lowest in-stock CAD floor across Amazon.ca, Newegg.ca, Canada Computers, Memory Express, Best Buy, PC-Canada — checked May 13 2026. DDR5/NAND shortage pushed DDR5-6000 32GB to $580-620 and 4TB NVMe to $950-1050 in Canada; 8TB QLC still $2100-2400. Prices shown are the absolute floor, move daily, within $30-50 of street.",
+  "kits": {
+    "ddr4": { "16": 149, "32": 289, "64": 589, "128": 1199 },
+    "ddr5": { "16": 349, "32": 599, "48": 1029, "64": 1299, "96": 2199, "128": 3099 }
+  },
+  "ssd": { "256": 89, "512": 149, "1024": 229, "2048": 449, "4096": 1099, "8192": 2399 }
+}
