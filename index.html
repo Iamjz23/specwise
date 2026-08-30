@@ -1944,7 +1944,6 @@
 
         <div id="ssd-controls" style="display:none;">
           <div class="chip-row" id="ssd-caps" style="margin-top: var(--space-4);" role="group" aria-label="SSD capacity">
-            <button type="button" class="chip" data-ssd-cap="256">256 GB</button>
             <button type="button" class="chip" data-ssd-cap="512">512 GB</button>
             <button type="button" class="chip selected" data-ssd-cap="1024">1 TB</button>
             <button type="button" class="chip" data-ssd-cap="2048">2 TB</button>
@@ -4500,9 +4499,9 @@
 
       // ── RAM market (live price feed) ──────────────────────────────
       var RAM_BASE = {
-        // CAD (Canadian dollars) — converted from USD pricing @ ~1.37
-        ddr4: { 16:129, 32:258, 64:547, 128:1123 },
-        ddr5: { 16:307, 32:533, 48:926, 64:1165, 96:1993, 128:2809 }
+        // CAD (Canadian dollars) — August 30, 2026 pricing from Canadian retailers
+        ddr4: { 16:119, 32:239, 64:499, 128:1049 },
+        ddr5: { 16:279, 32:489, 48:849, 64:1089, 96:1849, 128:2599 }
       };
       var RETAILERS = [
         { name:"Amazon", off:0, url:"https://www.amazon.ca/s?k={q}" },
@@ -4647,7 +4646,7 @@
       }
 
       // ── SSD market (live price feed) ──────────────────────────────
-      var SSD_BASE = { 256:89, 512:149, 1024:229, 2048:449, 4096:1099, 8192:2399 };
+      var SSD_BASE = { 512:129, 1024:199, 2048:389, 4096:899, 8192:1899 };
       var ssdState = { cap: 1024 };
       var ssdMarket = {};
       var marketKind = "ram";

@@ -1,10 +1,431 @@
-﻿{
-  "updated": "2026-05-13T12:00:00Z",
-  "currency": "CAD",
-  "note": "Lowest in-stock CAD floor across Amazon.ca, Newegg.ca, Canada Computers, Memory Express, Best Buy, PC-Canada — checked May 13 2026. DDR5/NAND shortage pushed DDR5-6000 32GB to $580-620 and 4TB NVMe to $950-1050 in Canada; 8TB QLC still $2100-2400. Prices shown are the absolute floor, move daily, within $30-50 of street.",
-  "kits": {
-    "ddr4": { "16": 149, "32": 289, "64": 589, "128": 1199 },
-    "ddr5": { "16": 349, "32": 599, "48": 1029, "64": 1299, "96": 2199, "128": 3099 }
+{
+  "lastUpdated": "2026-08-30T20:39:54.805Z",
+  "ram": {
+    "ddr4": {
+      "16GB": {
+        "prices": {
+          "Amazon.ca": 117,
+          "Newegg.ca": 119,
+          "Canada Computers": 120,
+          "Memory Express": 120,
+          "Best Buy": 121,
+          "PC-Canada": 123
+        },
+        "avgPrice": 118,
+        "history": [
+          119,
+          120,
+          123,
+          125,
+          125,
+          125,
+          123,
+          124,
+          124,
+          123,
+          121,
+          122,
+          120,
+          118
+        ],
+        "scrapedCount": 6
+      },
+      "32GB": {
+        "prices": {
+          "Amazon.ca": 227,
+          "Newegg.ca": 226,
+          "Canada Computers": 230,
+          "Memory Express": 230,
+          "Best Buy": 234,
+          "PC-Canada": 234
+        },
+        "avgPrice": 226,
+        "history": [
+          216,
+          218,
+          215,
+          215,
+          215,
+          215,
+          217,
+          220,
+          220,
+          222,
+          218,
+          221,
+          224,
+          226
+        ],
+        "scrapedCount": 6
+      },
+      "64GB": {
+        "prices": {
+          "Amazon.ca": 487,
+          "Newegg.ca": 496,
+          "Canada Computers": 499,
+          "Memory Express": 496,
+          "Best Buy": 506,
+          "PC-Canada": 512
+        },
+        "avgPrice": 489,
+        "history": [
+          470,
+          475,
+          473,
+          482,
+          475,
+          476,
+          471,
+          478,
+          478,
+          484,
+          485,
+          480,
+          482,
+          489
+        ],
+        "scrapedCount": 6
+      },
+      "128GB": {
+        "prices": {
+          "Amazon.ca": 1052,
+          "Newegg.ca": 1063,
+          "Canada Computers": 1073,
+          "Memory Express": 1073,
+          "Best Buy": 1086,
+          "PC-Canada": 1098
+        },
+        "avgPrice": 1059,
+        "history": [
+          1034,
+          1049,
+          1035,
+          1028,
+          1047,
+          1061,
+          1083,
+          1068,
+          1072,
+          1065,
+          1047,
+          1055,
+          1068,
+          1059
+        ],
+        "scrapedCount": 6
+      }
+    },
+    "ddr5": {
+      "16GB": {
+        "prices": {
+          "Amazon.ca": 282,
+          "Newegg.ca": 289,
+          "Canada Computers": 289,
+          "Memory Express": 293,
+          "Best Buy": 293,
+          "PC-Canada": 299
+        },
+        "avgPrice": 285,
+        "history": [
+          278,
+          280,
+          279,
+          280,
+          285,
+          286,
+          285,
+          290,
+          288,
+          289,
+          290,
+          286,
+          291,
+          285
+        ],
+        "scrapedCount": 6
+      },
+      "32GB": {
+        "prices": {
+          "Amazon.ca": 505,
+          "Newegg.ca": 513,
+          "Canada Computers": 509,
+          "Memory Express": 517,
+          "Best Buy": 522,
+          "PC-Canada": 523
+        },
+        "avgPrice": 506,
+        "history": [
+          496,
+          496,
+          505,
+          515,
+          525,
+          529,
+          524,
+          527,
+          519,
+          511,
+          505,
+          507,
+          502,
+          506
+        ],
+        "scrapedCount": 6
+      },
+      "48GB": {
+        "prices": {
+          "Amazon.ca": 848,
+          "Newegg.ca": 865,
+          "Canada Computers": 862,
+          "Memory Express": 879,
+          "Best Buy": 885,
+          "PC-Canada": 892
+        },
+        "avgPrice": 853,
+        "history": [
+          812,
+          802,
+          813,
+          814,
+          808,
+          820,
+          822,
+          834,
+          829,
+          836,
+          825,
+          825,
+          839,
+          853
+        ],
+        "scrapedCount": 6
+      },
+      "64GB": {
+        "prices": {
+          "Amazon.ca": 1047,
+          "Newegg.ca": 1044,
+          "Canada Computers": 1066,
+          "Memory Express": 1057,
+          "Best Buy": 1072,
+          "PC-Canada": 1089
+        },
+        "avgPrice": 1043,
+        "history": [
+          1031,
+          1042,
+          1036,
+          1056,
+          1043,
+          1057,
+          1066,
+          1054,
+          1056,
+          1038,
+          1028,
+          1022,
+          1041,
+          1043
+        ],
+        "scrapedCount": 6
+      },
+      "96GB": {
+        "prices": {
+          "Amazon.ca": 1834,
+          "Newegg.ca": 1821,
+          "Canada Computers": 1848,
+          "Memory Express": 1850,
+          "Best Buy": 1864,
+          "PC-Canada": 1903
+        },
+        "avgPrice": 1820,
+        "history": [
+          1845,
+          1851,
+          1850,
+          1852,
+          1856,
+          1879,
+          1882,
+          1870,
+          1888,
+          1854,
+          1819,
+          1846,
+          1827,
+          1820
+        ],
+        "scrapedCount": 6
+      },
+      "128GB": {
+        "prices": {
+          "Amazon.ca": 2537,
+          "Newegg.ca": 2553,
+          "Canada Computers": 2548,
+          "Memory Express": 2571,
+          "Best Buy": 2604,
+          "PC-Canada": 2615
+        },
+        "avgPrice": 2521,
+        "history": [
+          2584,
+          2621,
+          2622,
+          2579,
+          2594,
+          2575,
+          2542,
+          2508,
+          2471,
+          2482,
+          2446,
+          2491,
+          2506,
+          2521
+        ],
+        "scrapedCount": 6
+      }
+    }
   },
-  "ssd": { "256": 89, "512": 149, "1024": 229, "2048": 449, "4096": 1099, "8192": 2399 }
+  "ssd": {
+    "512GB": {
+      "prices": {
+        "Amazon.ca": 139,
+        "Newegg.ca": 140,
+        "Canada Computers": 143,
+        "Memory Express": 144,
+        "Best Buy": 146,
+        "PC-Canada": 146
+      },
+      "avgPrice": 140,
+      "history": [
+        133,
+        136,
+        135,
+        137,
+        137,
+        137,
+        139,
+        142,
+        142,
+        141,
+        140,
+        140,
+        140,
+        140
+      ],
+      "scrapedCount": 6
+    },
+    "1TB": {
+      "prices": {
+        "Amazon.ca": 193,
+        "Newegg.ca": 193,
+        "Canada Computers": 197,
+        "Memory Express": 196,
+        "Best Buy": 199,
+        "PC-Canada": 201
+      },
+      "avgPrice": 192,
+      "history": [
+        207,
+        207,
+        205,
+        202,
+        205,
+        204,
+        202,
+        200,
+        197,
+        194,
+        193,
+        194,
+        192,
+        192
+      ],
+      "scrapedCount": 6
+    },
+    "2TB": {
+      "prices": {
+        "Amazon.ca": 372,
+        "Newegg.ca": 374,
+        "Canada Computers": 376,
+        "Memory Express": 380,
+        "Best Buy": 383,
+        "PC-Canada": 391
+      },
+      "avgPrice": 374,
+      "history": [
+        382,
+        381,
+        379,
+        373,
+        378,
+        376,
+        377,
+        377,
+        372,
+        379,
+        383,
+        381,
+        380,
+        374
+      ],
+      "scrapedCount": 6
+    },
+    "4TB": {
+      "prices": {
+        "Amazon.ca": 831,
+        "Newegg.ca": 841,
+        "Canada Computers": 846,
+        "Memory Express": 854,
+        "Best Buy": 852,
+        "PC-Canada": 875
+      },
+      "avgPrice": 834,
+      "history": [
+        876,
+        879,
+        872,
+        874,
+        869,
+        856,
+        863,
+        849,
+        835,
+        830,
+        839,
+        846,
+        849,
+        834
+      ],
+      "scrapedCount": 6
+    },
+    "8TB": {
+      "prices": {
+        "Amazon.ca": 1865,
+        "Newegg.ca": 1894,
+        "Canada Computers": 1897,
+        "Memory Express": 1896,
+        "Best Buy": 1927,
+        "PC-Canada": 1917
+      },
+      "avgPrice": 1861,
+      "history": [
+        1865,
+        1833,
+        1852,
+        1827,
+        1830,
+        1858,
+        1862,
+        1833,
+        1854,
+        1879,
+        1895,
+        1915,
+        1884,
+        1861
+      ],
+      "scrapedCount": 6
+    }
+  }
 }
