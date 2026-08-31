@@ -21,7 +21,7 @@
   "ram": {
     "DDR4": {
       "16GB": {
-        "lowestPrice": 117,
+        "lowestPrice": 125,
         "retailer": "Amazon.ca",
         "productName": "Corsair Vengeance LPX 16GB DDR4 3200MHz",
         "productUrl": "https://www.amazon.ca/",
@@ -36,7 +36,7 @@
         "confidence": 0.95
       },
       "32GB": {
-        "lowestPrice": 227,
+        "lowestPrice": 265,
         "retailer": "Amazon.ca",
         "productName": "Corsair Vengeance LPX 32GB DDR4 3200MHz",
         "productUrl": "https://www.amazon.ca/",
@@ -51,7 +51,7 @@
         "confidence": 0.95
       },
       "64GB": {
-        "lowestPrice": 487,
+        "lowestPrice": 549,
         "retailer": "Amazon.ca",
         "productName": "Corsair Vengeance LPX 64GB DDR4 3200MHz",
         "productUrl": "https://www.amazon.ca/",
@@ -70,7 +70,7 @@
         "retailer": "Amazon.ca",
         "productName": "Corsair Vengeance LPX 128GB DDR4 3200MHz",
         "productUrl": "https://www.amazon.ca/",
-        "model": "CMK128GX4M2B3200C16",
+        "model": "NEMIX RAM 128GB (2X64GB) DDR4 2666MHZ PC4-21300 4Rx4 1.2V 288-PIN ECC LRDIMM KIT",
         "capacity": 128,
         "type": "DDR4",
         "kit": "2x64GB",
@@ -83,7 +83,7 @@
     },
     "DDR5": {
       "16GB": {
-        "lowestPrice": 282,
+        "lowestPrice": 320,
         "retailer": "Amazon.ca",
         "productName": "Corsair Vengeance 16GB DDR5 5600MHz",
         "productUrl": "https://www.amazon.ca/",
@@ -98,7 +98,7 @@
         "confidence": 0.95
       },
       "32GB": {
-        "lowestPrice": 505,
+        "lowestPrice": 600,
         "retailer": "Amazon.ca",
         "productName": "Corsair Vengeance 32GB DDR5 5600MHz",
         "productUrl": "https://www.amazon.ca/",
@@ -113,7 +113,7 @@
         "confidence": 0.95
       },
       "48GB": {
-        "lowestPrice": 848,
+        "lowestPrice": 850,
         "retailer": "Amazon.ca",
         "productName": "Corsair Vengeance 48GB DDR5 5600MHz",
         "productUrl": "https://www.amazon.ca/",
@@ -128,7 +128,7 @@
         "confidence": 0.95
       },
       "64GB": {
-        "lowestPrice": 1044,
+        "lowestPrice": 1355,
         "retailer": "Amazon.ca",
         "productName": "Corsair Vengeance 64GB DDR5 5600MHz",
         "productUrl": "https://www.amazon.ca/",
@@ -143,9 +143,9 @@
         "confidence": 0.95
       },
       "96GB": {
-        "lowestPrice": 1821,
+        "lowestPrice": 1855,
         "retailer": "Amazon.ca",
-        "productName": "Corsair Vengeance 96GB DDR5 5600MHz",
+        "productName": "Corsair Vengeance 96GB DDR5 4x24gb 5600MHz",
         "productUrl": "https://www.amazon.ca/",
         "model": "CMK96GX5M2B5600C36",
         "capacity": 96,
@@ -176,7 +176,7 @@
   },
   "ssd": {
     "512GB": {
-      "lowestPrice": 139,
+      "lowestPrice": 115,
       "retailer": "Amazon.ca",
       "productName": "Samsung 980 PRO 512GB NVMe PCIe 4.0",
       "productUrl": "https://www.amazon.ca/",
@@ -189,7 +189,7 @@
       "confidence": 0.95
     },
     "1TB": {
-      "lowestPrice": 193,
+      "lowestPrice": 215,
       "retailer": "Amazon.ca",
       "productName": "Samsung 980 PRO 1TB NVMe PCIe 4.0",
       "productUrl": "https://www.amazon.ca/",
@@ -202,7 +202,7 @@
       "confidence": 0.95
     },
     "2TB": {
-      "lowestPrice": 372,
+      "lowestPrice": 350,
       "retailer": "Amazon.ca",
       "productName": "Samsung 980 PRO 2TB NVMe PCIe 4.0",
       "productUrl": "https://www.amazon.ca/",
@@ -215,7 +215,7 @@
       "confidence": 0.95
     },
     "4TB": {
-      "lowestPrice": 831,
+      "lowestPrice": 588,
       "retailer": "Amazon.ca",
       "productName": "Samsung 980 PRO 4TB NVMe PCIe 4.0",
       "productUrl": "https://www.amazon.ca/",
@@ -228,7 +228,7 @@
       "confidence": 0.95
     },
     "8TB": {
-      "lowestPrice": 1865,
+      "lowestPrice": 2150,
       "retailer": "Amazon.ca",
       "productName": "Crucial T500 8TB NVMe PCIe 4.0",
       "productUrl": "https://www.amazon.ca/",
