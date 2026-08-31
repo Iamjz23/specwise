@@ -1,5 +1,5 @@
 {
-  "updated": "2026-08-31T00:27:37.339633+00:00",
+  "updated": "2026-08-31T02:12:58.133064+00:00",
   "currency": "CAD",
   "note": "Prices collected from Canadian retailers. Data may be stale - verify before purchase.",
   "kits": {
@@ -178,7 +178,7 @@
     }
   },
   "_metadata": {
-    "generatedAt": "2026-08-31T00:27:37.339633+00:00",
+    "generatedAt": "2026-08-31T02:12:58.133064+00:00",
     "freshnessDays": 7,
     "targetRetailers": [
       "Amazon.ca",

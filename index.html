@@ -2680,7 +2680,7 @@
         // CPU-heavy: simulation/CFD, Houdini/Nuke, engineering, pure-CPU renderers, UE5 compile, Visual Studio
         var cpuHeavy = w.simulation || hasVfxSoft || hasEngSoft || hasUe5 || hasVisualStudio || (rn && rn.cpu && !rn.gpu) || sig.multi >= 4;
         // AI is VRAM-first, then RAM, then GPU compute — support multiple picks
-        var aiWorkload = w.ai || hasAiUse("llm") || hasAiUse("image");
+        var aiWorkload = w.ai || hasAiUse("llm") || hasAiUse("image") || hasAiUse("dev");
         // Single-core sensitive (viewport, CAD, Photoshop, Maya, VS Code, Godot)
         var singleCoreSensitive = hasSolidworks || hasVsCode || hasGodot || sig.single >= 5 || hasDesignSoft || w.creative3d;
         // UE5/Game dev RAM-heavy (shader compile, lightmaps) and Visual Studio RAM-heavy
