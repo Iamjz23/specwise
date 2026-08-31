@@ -1,0 +1,14 @@
+{
+  "name": "specwise-price-scraper",
+  "version": "1.0.0",
+  "description": "Daily scraper for Canadian RAM and SSD prices from 5 retailers",
+  "type": "module",
+  "scripts": {
+    "scrape": "node scraper.js",
+    "schedule": "node scheduler.js"
+  },
+  "dependencies": {
+    "node-cron": "^3.0.3",
+    "puppeteer": "^22.0.0"
+  }
+}
