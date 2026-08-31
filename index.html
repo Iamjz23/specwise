@@ -2516,7 +2516,7 @@
         pick: { cpu:"", gpu:"", ram:"", storage:"" },
         custom: false,
         perf: { mode:"gaming", game:"cyberpunk", res:"1440p", preset:"ultra", rt:"on", dlss:"off", app3d:"blender", appsim:"ansys" },
-        perfSelection: { cpu:null, gpu:null, initializedForPick:{cpu:"", gpu:""} },
+        perfState: { cpuId:null, gpuId:null, initializedForPick:{cpu:"", gpu:""} },
         compare: { mode:"gpu", a:"rtx5090", b:"rx9070xt" },
         psu: { cooler:"air", gpuCount:1, ram:2, ssd:1, hdd:0, fans:3 },
         ai: { gpuCount: 1 }
@@ -2604,6 +2604,8 @@
       function activeWorkloads() { return Object.keys(state.workloads).filter(function(k){ return state.workloads[k]; }); }
       function selGpu() { return GPUS[state.pick.gpu]; }
       function selCpu() { return CPUS[state.pick.cpu]; }
+      function perfSelGpu() { var id = state.perfState.gpuId || state.pick.gpu; return GPUS[id]; }
+      function perfSelCpu() { var id = state.perfState.cpuId || state.pick.cpu; return CPUS[id]; }
       function tierName(n) { return n>=5?"Critical":n===4?"High":n===3?"Medium":"Low"; }
 
       // ── Priority engine (workload + renderer + software aware) ──────
@@ -3386,6 +3388,13 @@
       function renderConfigurator() {
         var rec = recommendParts();
         if (!state.custom) { state.pick.cpu = rec.cpu; state.pick.gpu = rec.gpu; state.pick.ram = rec.ram; state.pick.storage = rec.storage; }
+        
+        // Initialize Performance state from the new build recommendation
+        state.perfState.cpuId = state.pick.cpu;
+        state.perfState.gpuId = state.pick.gpu;
+        state.perfState.initializedForPick.cpu = state.pick.cpu;
+        state.perfState.initializedForPick.gpu = state.pick.gpu;
+        
         var gpuOpts = Object.keys(GPUS).filter(function(id){ return GPUS[id].cat === "gaming" && gpuAllowed(GPUS[id].brand); }).map(function(id){ var g=GPUS[id]; return "<option value=\""+id+"\""+(id===state.pick.gpu?" selected":"")+">"+g.name+" · "+g.vram+" GB · "+gpuPriceLabel(g)+"</option>"; }).join("");
         var cpuOpts = Object.keys(CPUS).map(function(id){ var c=CPUS[id]; return "<option value=\""+id+"\""+(id===state.pick.cpu?" selected":"")+">"+c.name+" · "+c.ct+" · "+cpuPriceLabel(c)+"</option>"; }).join("");
         document.getElementById("cfg-gpu").innerHTML = gpuOpts;
@@ -3614,7 +3623,7 @@
         if (mode === "ai") renderAI();
       }
       function renderAI() {
-        var g = selGpu();
+        var g = perfSelGpu();
         if (!g) return;
         var count = state.ai.gpuCount;
         var totalVram = g.vram * count;
@@ -3963,17 +3972,21 @@
         var gpuCombo = createCombobox(
           document.getElementById("perf-gpu-input"),
           document.getElementById("perf-gpu-list"),
-          function(value){ state.pick.gpu = value; state.custom = true; renderBasis(); renderPerf(); renderAI(); renderProfileChart(); renderPsu(); }
+          function(value){ state.perfState.gpuId = value; renderBasis(); renderPerf(); renderAI(); }
         );
         var cpuCombo = createCombobox(
           document.getElementById("perf-cpu-input"),
           document.getElementById("perf-cpu-list"),
-          function(value){ state.pick.cpu = value; state.custom = true; renderBasis(); renderPerf(); renderAI(); renderProfileChart(); renderPsu(); }
+          function(value){ state.perfState.cpuId = value; renderBasis(); renderPerf(); renderAI(); }
         );
         var gpuOpts = Object.keys(GPUS).map(function(id){ return { value: id, label: GPUS[id].name + " · " + GPUS[id].vram + " GB" }; });
         var cpuOpts = Object.keys(CPUS).map(function(id){ return { value: id, label: CPUS[id].name + " · " + CPUS[id].ct }; });
-        gpuCombo.setOptions(gpuOpts, state.pick.gpu);
-        cpuCombo.setOptions(cpuOpts, state.pick.cpu);
+        
+        // Initialize combo boxes with Performance state (or fall back to pick if not initialized)
+        var initialGpu = state.perfState.gpuId || state.pick.gpu;
+        var initialCpu = state.perfState.cpuId || state.pick.cpu;
+        gpuCombo.setOptions(gpuOpts, initialGpu);
+        cpuCombo.setOptions(cpuOpts, initialCpu);
       }
       function compareMetrics(isGpu) {
         if (isGpu) {
@@ -4316,6 +4329,23 @@
           navBtns[j].setAttribute("aria-current", active ? "page" : "false");
         }
         if (name === "contact") renderContactBuild();
+        
+        // When switching to Performance tab, re-initialize combo boxes with current pick values
+        // This ensures the Performance tab shows the latest build recommendation
+        if (name === "performance") {
+          // Sync Performance state from pick if it hasn't been initialized yet or if pick changed
+          if (!state.perfState.initializedForPick || 
+              state.perfState.initializedForPick.cpu !== state.pick.cpu || 
+              state.perfState.initializedForPick.gpu !== state.pick.gpu) {
+            state.perfState.cpuId = state.pick.cpu;
+            state.perfState.gpuId = state.pick.gpu;
+            state.perfState.initializedForPick.cpu = state.pick.cpu;
+            state.perfState.initializedForPick.gpu = state.pick.gpu;
+          }
+          wirePerfHardware();
+          renderPerf();
+        }
+        
         window.scrollTo({ top: 0, left: 0, behavior: "instant" });
       }
       function wireViewNav() {
