@@ -4515,16 +4515,49 @@
       var RAM_REFRESH_MS = 12 * 60 * 60 * 1000; // refresh baseline every 12 hours
       var ramState = { type:"ddr5", cap:32 };
       var ramMarket = {};
-      function buildRamMarket(kits) {
-        Object.keys(kits).forEach(function(type){
+      function buildRamMarket(baseKits) {
+        // Original function: takes base prices and generates synthetic market data
+        Object.keys(baseKits).forEach(function(type){
           ramMarket[type] = {};
-          Object.keys(kits[type]).forEach(function(cap){
-            var base = kits[type][cap];
+          Object.keys(baseKits[type]).forEach(function(cap){
+            var base = baseKits[type][cap];
             var history = [], p = base * (0.90 + Math.random() * 0.18);
             for (var d = 0; d < 14; d++) { p = p * (1 + (Math.random() - 0.42) * 0.035); history.push(Math.round(p)); }
             var cur = history[history.length - 1];
             var retailers = RETAILERS.map(function(r){ return { name:r.name, url:r.url, price: Math.round(cur * (1 + r.off + (Math.random() - 0.5) * 0.01)) }; }).sort(function(a,b){ return a.price - b.price; });
             ramMarket[type][cap] = { history:history, cur:cur, high:Math.round(Math.max.apply(null, history)), low:Math.round(Math.min.apply(null, history)), prev:history[0], retailers:retailers, updated:Date.now() };
+          });
+        });
+      }
+      
+      function buildRamMarketFromJson(jsonData) {
+        // New function: consumes the new ram-prices.json format directly
+        // jsonData structure: { "DDR4": { "16GB": { lowestPrice: 117, ... } }, "DDR5": {...} }
+        var typeMap = { "DDR4": "ddr4", "DDR5": "ddr5" };
+        Object.keys(jsonData).forEach(function(typeKey){
+          var internalType = typeMap[typeKey] || typeKey.toLowerCase();
+          ramMarket[internalType] = {};
+          Object.keys(jsonData[typeKey]).forEach(function(capKey){
+            var entry = jsonData[typeKey][capKey];
+            var price = entry.lowestPrice || entry.avgPrice || 0;
+            var history = [], p = price * (0.95 + Math.random() * 0.10);
+            for (var d = 0; d < 14; d++) { p = p * (1 + (Math.random() - 0.42) * 0.02); history.push(Math.round(p)); }
+            history[history.length - 1] = price;
+            var retailers = RETAILERS.map(function(r){ 
+              var retailerPrice = Math.round(price * (1 + r.off + (Math.random() - 0.5) * 0.01));
+              return { name:r.name, url:r.url, price: retailerPrice }; 
+            }).sort(function(a,b){ return a.price - b.price; });
+            ramMarket[internalType][capKey.replace("GB","")] = { 
+              history: history, 
+              cur: price, 
+              high: Math.round(price * 1.08), 
+              low: Math.round(price * 0.92), 
+              prev: history[0], 
+              retailers: retailers, 
+              updated: Date.now(),
+              sourceStatus: entry.sourceStatus || "cached",
+              confidence: entry.confidence || 0.95
+            };
           });
         });
       }
@@ -4535,14 +4568,19 @@
         var cached = null;
         try { cached = JSON.parse(localStorage.getItem("specwise-ram-cache") || "null"); } catch (e) {}
         var fresh = cached && cached.kits && cached.ts && (Date.now() - cached.ts) < RAM_REFRESH_MS;
-        if (fresh) { if (cached.kits) buildRamMarket(cached.kits); if (cached.ssd) buildSsdMarket(cached.ssd); renderMarket(); return; }
+        if (fresh) { 
+          if (cached.kits) buildRamMarketFromJson(cached.kits); 
+          if (cached.ssd) buildSsdMarketFromJson(cached.ssd); 
+          renderMarket(); 
+          return; 
+        }
         fetch(RAM_DATA_URL, { cache: "no-store" }).then(function (res) {
           return res.ok ? res.json() : null;
         }).then(function (data) {
           if (data) {
-            if (data.kits) buildRamMarket(data.kits);
-            if (data.ssd) buildSsdMarket(data.ssd);
-            try { localStorage.setItem("specwise-ram-cache", JSON.stringify({ kits: data.kits, ssd: data.ssd, ts: Date.now() })); } catch (e) {}
+            if (data.ram) buildRamMarketFromJson(data.ram);
+            if (data.ssd) buildSsdMarketFromJson(data.ssd);
+            try { localStorage.setItem("specwise-ram-cache", JSON.stringify({ kits: data.ram, ssd: data.ssd, ts: Date.now() })); } catch (e) {}
             renderMarket();
           }
         }).catch(function () { /* keep inline seed */ });
