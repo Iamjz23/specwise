@@ -584,6 +584,7 @@
     .ai-cap-list .mark svg { width: 16px; height: 16px; }
     .mark-ok { color: var(--canvas-dark-fg); }
     .mark-warn { color: color-mix(in oklch, var(--canvas-dark-fg) 60%, transparent); }
+    .mark-err { color: #d93025; }
 
     .vram-stat {
       font-family: var(--font-display); font-size: clamp(48px, 7vw, 72px);
@@ -1797,6 +1798,56 @@
             </ul>
 
             <p class="disclaimer">Multi-Mac setups use distributed inference (exo / llama.cpp RPC). It pools memory but decode doesn't scale linearly, and long prompts stay slow — a single big-GPU build is usually faster for throughput. Mac prices are July 2026 US list; Apple raised configured-memory pricing in 2026. Tokens/sec are community measurements (Q4, single stream) — indicative only.</p>
+          </div>
+
+          <!-- AMD Ryzen AI Max+ alternative (LLM only) -->
+          <div class="perf-card" data-od-id="amd-alternative" id="perf-amd-ai-max" style="display:none;">
+            <h3 style="font-size: 22px; margin-bottom: var(--space-3);">AMD Ryzen AI Max+ — LLM only</h3>
+            <p class="meta" style="color: color-mix(in oklch, var(--canvas-dark-fg) 60%, transparent); margin-bottom: var(--space-5);">AMD's Strix Halo APUs bring desktop-class Zen 5 CPU + RDNA 3.5 iGPU + XDNA 2 NPU into thin laptops. Unified LPDDR5X-8533 memory acts like VRAM — 64 GB or 128 GB configs can run models that discrete GPUs can't fit. Quiet (~35–65 W), portable, but slower tokens/sec than dedicated GPUs and limited CUDA ecosystem support (uses ROCm / Vulkan).</p>
+
+            <h4 style="font-size: 14px; margin: 0 0 var(--space-2); color: var(--canvas-dark-fg); font-family: var(--font-mono); text-transform: uppercase; letter-spacing: 0.06em;">Ryzen AI Max+ 395 configurations</h4>
+            <div class="ai-model"><span><span class="am-name">Ryzen AI Max+ 395 — 64 GB</span><span class="am-spec">136 GB/s · fits 34B Q4 · ~8–14 tok/s</span></span><span class="am-spec">~CA$2,200 (laptop)</span></div>
+            <div class="ai-model"><span><span class="am-name">Ryzen AI Max+ 395 — 128 GB</span><span class="am-spec">136 GB/s · fits 70B Q4 · ~6–10 tok/s</span></span><span class="am-spec">~CA$2,800 (laptop)</span></div>
+
+            <h4 style="font-size: 14px; margin: var(--space-5) 0 var(--space-2); color: var(--canvas-dark-fg); font-family: var(--font-mono); text-transform: uppercase; letter-spacing: 0.06em;">Ryzen AI Max+ PRO 495 (enterprise)</h4>
+            <div class="ai-model"><span><span class="am-name">Ryzen AI Max+ PRO 495 — 192 GB</span><span class="am-spec">136 GB/s · fits DeepSeek V4 Flash · ~5–9 tok/s</span></span><span class="am-spec">~CA$3,500+ (mobile workstation)</span></div>
+
+            <h4 style="font-size: 14px; margin: var(--space-5) 0 var(--space-2); color: var(--canvas-dark-fg); font-family: var(--font-mono); text-transform: uppercase; letter-spacing: 0.06em;">Model compatibility (single APU)</h4>
+            <ul class="ai-cap-list" style="margin-bottom: var(--space-4);">
+              <li><span class="mark mark-ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>Qwen 3.8 27B (18 GB) → Runs on 64 GB, comfortable headroom</li>
+              <li><span class="mark mark-ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>Gemma 4 26B-A4B (16 GB) → Runs on 64 GB, excellent headroom</li>
+              <li><span class="mark mark-ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>Gemma 4 31B (20 GB) → Runs on 64 GB, comfortable</li>
+              <li><span class="mark mark-warn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4M12 17h.01"/><circle cx="12" cy="12" r="9"/></svg></span>GLM-5.3 Flash (115 GB) → Requires 128 GB config, tight fit</li>
+              <li><span class="mark mark-warn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4M12 17h.01"/><circle cx="12" cy="12" r="9"/></svg></span>DeepSeek V4 Flash (150 GB) → Requires 192 GB PRO config</li>
+              <li><span class="mark mark-err"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4M12 17h.01"/><circle cx="12" cy="12" r="9"/></svg></span>GLM-5.3 (260 GB) → Exceeds 192 GB max, cannot run locally</li>
+              <li><span class="mark mark-err"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4M12 17h.01"/><circle cx="12" cy="12" r="9"/></svg></span>Kimi K3 (700 GB) / DeepSeek V4 Pro (800 GB) → Far exceeds capacity</li>
+            </ul>
+
+            <p class="disclaimer">AMD Ryzen AI Max+ 395: 16-core Zen 5 (up to 5.0 GHz), Radeon 806M iGPU (40 CU, RDNA 3.5), XDNA 2 NPU (55 TOPS), LPDDR5X-8533 soldered memory. PRO 495 adds enterprise security/manageability and 192 GB config option. Tokens/sec are estimated from llama.cpp ROCm benchmarks (Q4, 2048 ctx) — actual performance varies by thermal envelope and laptop cooling. Unlike Mac, AMD APUs cannot be networked for distributed inference — single unit only. Sources: AMD product briefings (Computex 2025), Phoronix, ServeTheHome.</p>
+          </div>
+
+          <!-- NVIDIA DGX Spark alternative (LLM only) -->
+          <div class="perf-card" data-od-id="nvidia-dgx-spark" id="perf-nvidia-dgx" style="display:none;">
+            <h3 style="font-size: 22px; margin-bottom: var(--space-3);">NVIDIA DGX Spark — LLM workstation</h3>
+            <p class="meta" style="color: color-mix(in oklch, var(--canvas-dark-fg) 60%, transparent); margin-bottom: var(--space-5);">DGX Spark is NVIDIA's personal AI supercomputer — a Grace Blackwell GB10 Superchip with 20-core Arm CPU + Blackwell GPU sharing 128 GB unified LPDDR5X memory. Delivers desktop-workstation AI performance with full CUDA/TensorRT acceleration. Quiet (~200 W total), compact form factor, but fixed 128 GB memory ceiling limits largest model support. Single-unit design — not intended for multi-box clustering.</p>
+
+            <h4 style="font-size: 14px; margin: 0 0 var(--space-2); color: var(--canvas-dark-fg); font-family: var(--font-mono); text-transform: uppercase; letter-spacing: 0.06em;">DGX Spark specification</h4>
+            <div class="ai-model"><span><span class="am-name">DGX Spark (GB10) — 128 GB</span><span class="am-spec">Blackwell GPU · 20-core Grace CPU · ~80–120 tok/s (7B Q4)</span></span><span class="am-spec">~CA$4,000–4,500</span></div>
+
+            <h4 style="font-size: 14px; margin: var(--space-5) 0 var(--space-2); color: var(--canvas-dark-fg); font-family: var(--font-mono); text-transform: uppercase; letter-spacing: 0.06em;">Model compatibility &amp; performance (single unit)</h4>
+            <ul class="ai-cap-list" style="margin-bottom: var(--space-4);">
+              <li><span class="mark mark-ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>Qwen 3.8 27B (18 GB) → ~95–110 tok/s (Q4), excellent headroom</li>
+              <li><span class="mark mark-ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>Gemma 4 26B-A4B (16 GB) → ~100–115 tok/s (Q4), excellent headroom</li>
+              <li><span class="mark mark-ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>Gemma 4 31B (20 GB) → ~90–105 tok/s (Q4), comfortable</li>
+              <li><span class="mark mark-ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>GLM-5.3 Flash (115 GB) → ~18–28 tok/s (Q4), fits with modest headroom</li>
+              <li><span class="mark mark-warn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4M12 17h.01"/><circle cx="12" cy="12" r="9"/></svg></span>DeepSeek V4 Flash (150 GB) → Exceeds 128 GB, requires offloading (slow, ~5–10 tok/s with heavy RAM swap)</li>
+              <li><span class="mark mark-err"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4M12 17h.01"/><circle cx="12" cy="12" r="9"/></svg></span>GLM-5.3 (260 GB) / Kimi K3 (700 GB) / DeepSeek V4 Pro (800 GB) → Cannot fit in 128 GB, not viable without extreme offloading</li>
+            </ul>
+
+            <h4 style="font-size: 14px; margin: var(--space-5) 0 var(--space-2); color: var(--canvas-dark-fg); font-family: var(--font-mono); text-transform: uppercase; letter-spacing: 0.06em;">Multi-unit capability</h4>
+            <p style="font-size: 13px; line-height: 1.6; color: color-mix(in oklch, var(--canvas-dark-fg) 75%, transparent); margin-bottom: var(--space-3);">DGX Spark is designed as a <strong>single-unit personal workstation</strong>. Unlike Mac clusters, NVIDIA does not officially support linking multiple DGX Spark units for distributed inference. While technically possible via llama.cpp RPC or exo over Ethernet, it is not a validated configuration and performance scaling would be limited. For larger models requiring &gt;128 GB, NVIDIA recommends DGX Station or cloud-based HGX/A100/H200 solutions instead.</p>
+
+            <p class="disclaimer">DGX Spark: NVIDIA GB10 Grace Blackwell Superchip (20-core Arm Neoverse V2 CPU + Blackwell GPU with 5th-gen Tensor Cores), 128 GB LPDDR5X unified memory, NVLink-C2C interconnect. Token speeds based on TensorRT-LLM benchmarks (Q4, 2048 ctx) — representative of RTX 5070/5070 Ti class performance. Power draw ~200 W total system. Price estimate based on developer program pricing (2025). Sources: NVIDIA GTC 2025 announcements, NVIDIA technical briefings, AnandTech.</p>
           </div>
         </div>
       </div>
@@ -3554,6 +3605,8 @@
         document.getElementById("perf-sim").style.display = mode === "sim" ? "" : "none";
         document.getElementById("perf-ai").style.display = mode === "ai" ? "" : "none";
         document.getElementById("perf-mac").style.display = mode === "ai" ? "" : "none";
+        document.getElementById("perf-amd-ai-max").style.display = mode === "ai" ? "" : "none";
+        document.getElementById("perf-nvidia-dgx").style.display = mode === "ai" ? "" : "none";
         if (mode === "gaming") renderFPS();
         if (mode === "3d") renderPerf3D();
         if (mode === "sim") renderPerfSim();
