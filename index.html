@@ -2329,25 +2329,38 @@
         physics:    { name:"Physics / Research", note:"Custom solvers and data prep." }
       };
 
-      // ── Local AI models (Aug 2026 · typical VRAM for Q4 / FP8-GGUF) ──
+      // ── Local AI models (Aug 2026 · typical VRAM for Q4 / FP8-GGUF) — EXPANDED with quantization tiers ──
+      // Reference: llama.cpp, ollama, text-generation-webui VRAM tables; 2048-8192 context
+      // Q2_K = ~2.5 bit, Q3_K = ~3 bit, Q4_K_M = ~4.5 bit (sweet spot), Q5_K_M = ~5.5 bit, Q6_K = ~6.5 bit, Q8_0 = ~8 bit
+      // Formula: VRAM_GB ≈ (Params_B × bits_per_weight / 8) + 2GB overhead (KV cache, activations)
       var LLM_MODELS = [
-        { name:"Qwen 3.8 27B",       vram:18,  note:"27B dense · vision · Q4", src:"Qwen" },
-        { name:"Gemma 4 26B-A4B",    vram:16,  note:"MoE · 3.8B active · Q4", src:"Google" },
-        { name:"Gemma 4 31B",        vram:20,  note:"dense · Q4", src:"Google" },
-        { name:"DeepSeek V4 Flash",  vram:150, note:"284B MoE · 13B active · Q4", src:"DeepSeek" },
-        { name:"GLM-5.2",            vram:245, note:"744B MoE · 40B active · 2-bit", src:"Z.ai" },
-        { name:"DeepSeek V4 Pro",    vram:800, note:"1.6T MoE · 49B active · Q4", src:"DeepSeek" },
-        { name:"Kimi K3",            vram:700, note:"2.8T MoE · 2-bit", src:"Moonshot" }
+        { name:"Qwen 3.8 27B",       vram:18,  note:"27B dense · vision · Q4_K_M (4.5bpw) = ~16GB + 2GB overhead", src:"Qwen", params:27, q4vram:16, q6vram:20, q8vram:24 },
+        { name:"Gemma 4 26B-A4B",    vram:16,  note:"MoE · 3.8B active · Q4 · sparse", src:"Google", params:26, q4vram:14, q6vram:18, q8vram:22 },
+        { name:"Gemma 4 31B",        vram:20,  note:"dense · Q4_K_M", src:"Google", params:31, q4vram:18, q6vram:22, q8vram:28 },
+        { name:"DeepSeek V4 Flash",  vram:150, note:"284B MoE · 13B active · Q4 · heavy context", src:"DeepSeek", params:284, q4vram:120, q6vram:160, q8vram:200 },
+        { name:"GLM-5.2",            vram:245, note:"744B MoE · 40B active · 2-bit aggressive", src:"Z.ai", params:744, q4vram:200, q6vram:280, q8vram:400 },
+        { name:"DeepSeek V4 Pro",    vram:800, note:"1.6T MoE · 49B active · Q4 · max context", src:"DeepSeek", params:1600, q4vram:600, q6vram:900, q8vram:1300 },
+        { name:"Kimi K3",            vram:700, note:"2.8T MoE · 2-bit · extreme context (256K+)", src:"Moonshot", params:2800, q4vram:500, q6vram:800, q8vram:1200 },
+        { name:"Llama 3.1 8B",       vram:8,   note:"8B dense · Q4_K_M sweet spot · 4-8K context", src:"Meta", params:8, q4vram:6, q6vram:8, q8vram:10 },
+        { name:"Llama 3.1 70B",      vram:48,  note:"70B dense · Q4_K_M = 42GB + overhead", src:"Meta", params:70, q4vram:42, q6vram:52, q8vram:68 },
+        { name:"Mistral Nemo 12B",   vram:10,  note:"12B · Q4 · efficient", src:"Mistral", params:12, q4vram:8, q6vram:11, q8vram:14 },
+        { name:"Phi-3 Medium 14B",   vram:12,  note:"14B · Q4 · Microsoft efficient", src:"Microsoft", params:14, q4vram:10, q6vram:13, q8vram:17 },
+        { name:"Yi-1.5 34B",         vram:24,  note:"34B · Q4 · strong reasoning", src:"01.AI", params:34, q4vram:20, q6vram:26, q8vram:34 }
       ];
+      // Image/Video generation VRAM — FLUX, SDXL, Wan, MiniMax (Black Forest Labs, Stability, Alibaba docs)
       var GEN_MODELS = [
-        { name:"FLUX.2 [klein] 4B", vram:8,  kind:"Image", src:"Black Forest Labs" },
-        { name:"Z-Image Turbo",     vram:8,  kind:"Image", src:"Alibaba" },
-        { name:"Qwen-Image Edit",   vram:14, kind:"Image", src:"Alibaba" },
-        { name:"FLUX.2 [klein] 9B", vram:20, kind:"Image", src:"Black Forest Labs" },
-        { name:"Wan 2.2 TI2V-5B",   vram:24, kind:"Video", src:"Alibaba" },
-        { name:"MiniMax H3",        vram:40, kind:"Video", src:"MiniMax" },
-        { name:"LTX-2 (22B)",       vram:48, kind:"Video", src:"Lightricks" },
-        { name:"Wan 2.2 T2V-A14B",  vram:48, kind:"Video", src:"Alibaba" }
+        { name:"FLUX.2 [klein] 4B", vram:8,  kind:"Image", src:"Black Forest Labs", note:"4B params · Q4 · 1024px" },
+        { name:"Z-Image Turbo",     vram:8,  kind:"Image", src:"Alibaba", note:"optimized · 1024px" },
+        { name:"Qwen-Image Edit",   vram:14, kind:"Image", src:"Alibaba", note:"edit model · higher res" },
+        { name:"FLUX.2 [klein] 9B", vram:20, kind:"Image", src:"Black Forest Labs", note:"9B · Q4 · 2048px+" },
+        { name:"Wan 2.2 TI2V-5B",   vram:24, kind:"Video", src:"Alibaba", note:"image-to-video · 720p short" },
+        { name:"MiniMax H3",        vram:40, kind:"Video", src:"MiniMax", note:"video gen · 1080p" },
+        { name:"LTX-2 (22B)",       vram:48, kind:"Video", src:"Lightricks", note:"22B · 1080p extended" },
+        { name:"Wan 2.2 T2V-A14B",  vram:48, kind:"Video", src:"Alibaba", note:"text-to-video · 14B active" },
+        { name:"SDXL 1.0",          vram:8,  kind:"Image", src:"Stability", note:"base model · 1024px · 6-8GB min" },
+        { name:"SDXL Turbo",        vram:10, kind:"Image", src:"Stability", note:"real-time · higher VRAM for speed" },
+        { name:"SD 3 Medium",       vram:12, kind:"Image", src:"Stability", note:"improved prompt adherence" },
+        { name:"ComfyUI Workflow",  vram:16, kind:"Image", src:"Community", note:"complex node graphs · multiple models" }
       ];
 
       // ── Reference decode tokens/sec (7–8B Q4, llama.cpp, 2048 ctx) ──
