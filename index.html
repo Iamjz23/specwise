@@ -4590,7 +4590,9 @@
         // jsonData structure: { "DDR4": { "16GB": { lowestPrice: 117, ... } }, "DDR5": {...} }
         var typeMap = { "DDR4": "ddr4", "DDR5": "ddr5" };
         Object.keys(jsonData).forEach(function(typeKey){
-          var internalType = typeMap[typeKey] || typeKey.toLowerCase();
+          // Only process DDR4 and DDR5 keys, ignore metadata or other unexpected keys
+          if (!typeMap.hasOwnProperty(typeKey)) return;
+          var internalType = typeMap[typeKey];
           ramMarket[internalType] = {};
           Object.keys(jsonData[typeKey]).forEach(function(capKey){
             var entry = jsonData[typeKey][capKey];
