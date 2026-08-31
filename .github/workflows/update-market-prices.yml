@@ -2,11 +2,11 @@ name: Update Market Prices
 
 on:
   schedule:
-    # Run daily at 00:00 UTC (approximately the same time each day)
+    # Run daily at 00:00 UTC
     - cron: '0 0 * * *'
   workflow_dispatch:
     # Allow manual trigger for testing
-    
+
 permissions:
   contents: write
 
@@ -31,7 +31,6 @@ jobs:
           pip install requests beautifulsoup4 lxml
       
       - name: Run market price collector
-        id: collect
         run: python scripts/update_market_prices.py
         env:
           PYTHONUTF8: 1
@@ -53,15 +52,3 @@ jobs:
           git config --local user.name "github-actions[bot]"
           git commit -m "Update market prices $(date -u +%Y-%m-%dT%H:%M:%SZ)"
           git push
-      
-      - name: Summary
-        run: |
-          echo "## Price Update Summary" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "- **Status:** Completed" >> $GITHUB_STEP_SUMMARY
-          echo "- **Changes detected:** ${{ steps.git-check.outputs.has_changes }}" >> $GITHUB_STEP_SUMMARY
-          if [ "${{ steps.git-check.outputs.has_changes }}" = "true" ]; then
-            echo "- **Action:** Committed and pushed updated prices" >> $GITHUB_STEP_SUMMARY
-          else
-            echo "- **Action:** No meaningful price changes - skipped commit" >> $GITHUB_STEP_SUMMARY
-          fi

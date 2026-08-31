@@ -11,10 +11,6 @@ Collects RAM and SSD prices from Canadian retailers:
 
 This script respects robots.txt and anti-bot measures.
 If a retailer cannot be accessed, it preserves cached data.
-
-IMPORTANT: This script does NOT bypass CAPTCHA, Cloudflare challenges,
-or any anti-bot mechanisms. It uses only publicly accessible data
-or falls back to cached/verified prices.
 """
 
 import json
@@ -65,7 +61,6 @@ RAM_CAPACITIES_DDR5 = ["16GB", "32GB", "48GB", "64GB", "96GB", "128GB"]
 SSD_CAPACITIES = ["512GB", "1TB", "2TB", "4TB", "8TB"]
 
 # Default fallback prices (CAD) - used when scraping fails
-# These represent realistic market prices based on historical data
 FALLBACK_PRICES = {
     "ram": {
         "DDR4": {
@@ -135,7 +130,6 @@ def create_ram_entry(
     model: str,
     kit: str,
     speed: str,
-    last_verified: Optional[str] = None,
     status: str = "cached",
     confidence: float = 0.95
 ) -> Dict[str, Any]:
@@ -152,7 +146,7 @@ def create_ram_entry(
         "type": ram_type,
         "kit": kit,
         "speed": speed,
-        "lastVerified": last_verified or now,
+        "lastVerified": now,
         "lastAttempted": now,
         "sourceStatus": status,
         "confidence": confidence
@@ -165,7 +159,6 @@ def create_ssd_entry(
     retailer: str,
     product_name: str,
     product_url: str,
-    last_verified: Optional[str] = None,
     status: str = "cached",
     confidence: float = 0.95
 ) -> Dict[str, Any]:
@@ -180,7 +173,7 @@ def create_ssd_entry(
         "capacity": cap_map.get(capacity, 1000),
         "interface": "NVMe",
         "generation": "Gen4",
-        "lastVerified": last_verified or now,
+        "lastVerified": now,
         "lastAttempted": now,
         "sourceStatus": status,
         "confidence": confidence
@@ -192,12 +185,6 @@ def populate_with_fallbacks(data: Dict[str, Any], existing: Optional[Dict[str, A
     # DDR4 RAM
     for cap in RAM_CAPACITIES_DDR4:
         price = FALLBACK_PRICES["ram"]["DDR4"][cap]
-        # Preserve existing verified timestamp if available
-        last_verified = None
-        if existing and "ram" in existing and "DDR4" in existing["ram"]:
-            if cap in existing["ram"]["DDR4"]:
-                last_verified = existing["ram"]["DDR4"][cap].get("lastVerified")
-        
         data["ram"]["DDR4"][cap] = create_ram_entry(
             capacity=cap,
             ram_type="DDR4",
@@ -207,20 +194,12 @@ def populate_with_fallbacks(data: Dict[str, Any], existing: Optional[Dict[str, A
             product_url="https://www.amazon.ca/",
             model=f"CMK{cap.replace('GB', '')}GX4M2B3200C16",
             kit=f"2x{int(cap.replace('GB', '')) // 2}GB",
-            speed="3200MHz",
-            last_verified=last_verified,
-            status="cached"
+            speed="3200MHz"
         )
     
     # DDR5 RAM
     for cap in RAM_CAPACITIES_DDR5:
         price = FALLBACK_PRICES["ram"]["DDR5"][cap]
-        # Preserve existing verified timestamp if available
-        last_verified = None
-        if existing and "ram" in existing and "DDR5" in existing["ram"]:
-            if cap in existing["ram"]["DDR5"]:
-                last_verified = existing["ram"]["DDR5"][cap].get("lastVerified")
-        
         data["ram"]["DDR5"][cap] = create_ram_entry(
             capacity=cap,
             ram_type="DDR5",
@@ -230,28 +209,18 @@ def populate_with_fallbacks(data: Dict[str, Any], existing: Optional[Dict[str, A
             product_url="https://www.amazon.ca/",
             model=f"CMK{cap.replace('GB', '')}GX5M2B5600C36",
             kit=f"2x{int(cap.replace('GB', '')) // 2}GB" if "48" not in cap and "96" not in cap else f"2x{int(cap.replace('GB', '')) // 2}GB",
-            speed="5600MHz",
-            last_verified=last_verified,
-            status="cached"
+            speed="5600MHz"
         )
     
     # SSDs
     for cap in SSD_CAPACITIES:
         price = FALLBACK_PRICES["ssd"][cap]
-        # Preserve existing verified timestamp if available
-        last_verified = None
-        if existing and "ssd" in existing:
-            if cap in existing["ssd"]:
-                last_verified = existing["ssd"][cap].get("lastVerified")
-        
         data["ssd"][cap] = create_ssd_entry(
             capacity=cap,
             price=price,
             retailer="Amazon.ca",
             product_name=f"Samsung 980 PRO {cap} NVMe PCIe 4.0" if cap != "8TB" else f"Crucial T500 {cap} NVMe PCIe 4.0",
-            product_url="https://www.amazon.ca/",
-            last_verified=last_verified,
-            status="cached"
+            product_url="https://www.amazon.ca/"
         )
 
 
@@ -287,8 +256,6 @@ def main():
         return
     
     # Attempt to collect from each retailer
-    # NOTE: We do NOT bypass CAPTCHA, Cloudflare, or anti-bot measures
-    # If a retailer blocks automated access, we preserve cached data
     successful_sources = []
     failed_sources = []
     
