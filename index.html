@@ -783,6 +783,8 @@
     .cfg-select { width: 100%; padding: 12px 14px; border: 1px solid var(--meta); border-radius: var(--radius-sm); background: var(--bg); color: var(--fg); font: inherit; font-size: 15px; cursor: pointer; }
     .cfg-select:focus { outline: none; border-color: var(--accent); box-shadow: var(--focus-ring); }
     .cfg-select option, select option { background: var(--bg); color: var(--fg); }
+    .cfg-select optgroup, select optgroup { color: #4a4a4f; }
+    :root[data-theme="dark"] .cfg-select optgroup, :root[data-theme="dark"] select optgroup { color: #8a8a90; }
     .cfg-summary { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: var(--space-6); position: sticky; top: 84px; }
     .cfg-total { font-family: var(--font-display); font-size: clamp(40px, 5vw, 54px); font-weight: 600; letter-spacing: -0.03em; color: var(--fg); }
     .cfg-total .from { font-family: var(--font-mono); font-size: 11px; color: var(--muted); display: block; margin-bottom: 2px; letter-spacing: 0.04em; text-transform: uppercase; }
