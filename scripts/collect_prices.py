@@ -4,7 +4,7 @@ SpecWise Market Price Collector
 Semi-automated category-level price discovery for Canadian RAM & SSD products.
 
 Architecture:
-1. Newegg.ca - automated direct collection (when accessible)
+1. Newegg.ca - automated direct collection with HTML parsing (when accessible)
 2. HomeGadgets API - product discovery and price lookup (free tier)
 3. Manual entry support via market-products.json
 
@@ -18,10 +18,18 @@ import os
 import re
 import sys
 from datetime import datetime, timezone, timedelta
-from typing import Dict, List, Optional, Any
+from typing import Dict, List, Optional, Any, Tuple
 from urllib.request import Request, urlopen
 from urllib.error import URLError, HTTPError
+from urllib.parse import quote_plus, urlencode
 import hashlib
+
+try:
+    from bs4 import BeautifulSoup
+    HAS_BEAUTIFULSOUP = True
+except ImportError:
+    HAS_BEAUTIFULSOUP = False
+    print("[WARNING] BeautifulSoup not installed. HTML parsing will be limited.")
 
 # =============================================================================
 # CONFIGURATION
@@ -54,6 +62,32 @@ FRESHNESS_DAYS = 7  # Offers older than this are marked stale
 MAX_HOMEGADGETS_REQUESTS = 10  # Free tier limit per day
 
 HOMEGADGETS_BASE = "https://www.homegadgets.ca/public/v1"
+
+NEWEGG_BASE_URL = "https://www.newegg.ca/p/pl?d="
+
+# Search queries for category-level product discovery
+NEWEGG_SEARCH_QUERIES = [
+    # RAM searches - desktop memory only
+    ("DDR4 desktop memory 16GB", "ram", "ddr4", 16),
+    ("DDR4 desktop memory 32GB kit", "ram", "ddr4", 32),
+    ("DDR4 desktop memory 64GB kit", "ram", "ddr4", 64),
+    ("DDR4 desktop memory 128GB kit", "ram", "ddr4", 128),
+    ("DDR5 desktop memory 16GB", "ram", "ddr5", 16),
+    ("DDR5 desktop memory 32GB kit", "ram", "ddr5", 32),
+    ("DDR5 desktop memory 48GB kit", "ram", "ddr5", 48),
+    ("DDR5 desktop memory 64GB kit", "ram", "ddr5", 64),
+    ("DDR5 desktop memory 96GB kit", "ram", "ddr5", 96),
+    ("DDR5 desktop memory 128GB kit", "ram", "ddr5", 128),
+    # SSD searches
+    ("NVMe SSD 512GB", "ssd", None, 512),
+    ("NVMe SSD 1TB", "ssd", None, 1000),
+    ("NVMe SSD 2TB", "ssd", None, 2000),
+    ("NVMe SSD 4TB", "ssd", None, 4000),
+    ("NVMe SSD 8TB", "ssd", None, 8000),
+]
+
+MAX_PAGES_PER_SEARCH = 2  # Limit crawling depth
+MAX_PRODUCTS_PER_SEARCH = 20  # Max products to extract per search
 
 # =============================================================================
 # DATA STRUCTURES
@@ -232,33 +266,117 @@ class HomeGadgetsClient:
         return self.fetch(f"products/{product_id}/prices")
 
 # =============================================================================
-# NEWEGG COLLECTOR
+# NEWEGG COLLECTOR WITH HTML PARSING
 # =============================================================================
 
+def parse_newegg_price(price_text: str) -> Optional[float]:
+    """Extract price from Newegg price string."""
+    if not price_text:
+        return None
+    
+    # Remove currency symbols and whitespace
+    price_text = price_text.strip().replace('$', '').replace(',', '')
+    
+    # Try to extract numeric value
+    match = re.search(r'(\d+\.?\d*)', price_text)
+    if match:
+        try:
+            return float(match.group(1))
+        except ValueError:
+            return None
+    return None
+
+def parse_newegg_product(item, product_type: str, expected_generation: str = None, expected_capacity: int = None) -> Optional[Dict]:
+    """Parse a single Newegg product item."""
+    if not HAS_BEAUTIFULSOUP:
+        return None
+    
+    try:
+        # Extract product information
+        title_elem = item.find(['a', 'div'], class_=lambda x: x and ('title' in x.lower() or 'product' in x.lower()))
+        if not title_elem:
+            title_elem = item.find('a')
+        
+        if not title_elem:
+            return None
+        
+        product_name = title_elem.get_text(strip=True)
+        product_url = title_elem.get('href', '')
+        
+        if product_url and not product_url.startswith('http'):
+            product_url = f"https://www.newegg.ca{product_url}"
+        
+        # Extract price
+        price_elem = item.find(['div', 'span', 'li'], class_=lambda x: x and ('price' in x.lower() or 'current' in x.lower()))
+        if not price_elem:
+            price_elem = item.find(string=re.compile(r'\$\d+'))
+            if price_elem:
+                price_elem = price_elem.parent
+        
+        price_text = price_elem.get_text(strip=True) if price_elem else None
+        price = parse_newegg_price(price_text)
+        
+        if not price:
+            return None  # Skip products without valid price
+        
+        # Parse capacity and generation for RAM
+        if product_type == "ram":
+            capacity = parse_ram_capacity(product_name)
+            generation = parse_ram_generation(product_name)
+            
+            # Validate against expected values
+            if expected_capacity and capacity != expected_capacity:
+                return None
+            if expected_generation and generation != expected_generation:
+                return None
+            if not capacity or not generation:
+                return None
+            
+            category = get_category_key(product_type, capacity, generation)
+            
+        elif product_type == "ssd":
+            capacity = parse_ssd_capacity(product_name)
+            if not capacity:
+                return None
+            
+            # Find closest standard capacity
+            category = get_category_key(product_type, capacity)
+        
+        else:
+            return None
+        
+        if not category:
+            return None
+        
+        # Extract brand if possible
+        brand = "Unknown"
+        brand_match = re.match(r'^([A-Za-z0-9\-]+)', product_name)
+        if brand_match:
+            brand = brand_match.group(1)
+        
+        return {
+            "productName": product_name,
+            "brand": brand,
+            "price": price,
+            "url": product_url,
+            "category": category,
+            "product_type": product_type
+        }
+        
+    except Exception as e:
+        print(f"[Newegg] Error parsing product: {str(e)}")
+        return None
+
 def collect_newegg_products() -> List[Dict]:
-    """Collect RAM and SSD products from Newegg Canada."""
+    """Collect RAM and SSD products from Newegg Canada with HTML parsing."""
     products = []
     
-    search_queries = [
-        # RAM searches
-        ("DDR4 desktop memory 16GB", "ram", "ddr4"),
-        ("DDR4 desktop memory 32GB", "ram", "ddr4"),
-        ("DDR4 desktop memory 64GB", "ram", "ddr4"),
-        ("DDR5 desktop memory 16GB", "ram", "ddr5"),
-        ("DDR5 desktop memory 32GB", "ram", "ddr5"),
-        ("DDR5 desktop memory 48GB", "ram", "ddr5"),
-        ("DDR5 desktop memory 64GB", "ram", "ddr5"),
-        # SSD searches
-        ("NVMe SSD 512GB", "ssd", None),
-        ("NVMe SSD 1TB", "ssd", None),
-        ("NVMe SSD 2TB", "ssd", None),
-        ("NVMe SSD 4TB", "ssd", None),
-    ]
+    if not HAS_BEAUTIFULSOUP:
+        print("[Newegg] BeautifulSoup not available - skipping HTML parsing")
+        return products
     
-    base_url = "https://www.newegg.ca/p/pl?d="
-    
-    for query, product_type, generation in search_queries:
-        url = f"{base_url}{query.replace(' ', '+')}"
+    for query, product_type, generation, expected_cap in NEWEGG_SEARCH_QUERIES:
+        url = f"{NEWEGG_BASE_URL}{quote_plus(query)}"
         print(f"[Newegg] Searching: {query}")
         
         try:
@@ -270,22 +388,61 @@ def collect_newegg_products() -> List[Dict]:
             
             with urlopen(req, timeout=20) as response:
                 html = response.read().decode('utf-8', errors='ignore')
+                soup = BeautifulSoup(html, 'lxml')
                 
-                # Simple parsing - look for product items
-                # This is a basic implementation; real scraping would need proper HTML parsing
-                print(f"[Newegg] Retrieved page for: {query}")
+                # Try multiple selectors for product items
+                # Newegg's structure varies, so we try several patterns
+                product_items = []
                 
-                # Note: Full HTML parsing would require BeautifulSoup or similar
-                # For now, we note that Newegg access works but full parsing needs more work
+                # Pattern 1: Common product grid items
+                product_items.extend(soup.find_all('div', class_='item-container'))
+                product_items.extend(soup.find_all('div', {'data-item-id': True}))
+                product_items.extend(soup.find_all('article', class_='product-card'))
+                product_items.extend(soup.find_all('div', class_='product-card'))
+                
+                # Pattern 2: Generic items with price info
+                if not product_items:
+                    product_items = soup.find_all('div', class_=re.compile(r'item|product|card'))
+                
+                print(f"[Newegg] Found {len(product_items)} potential products for '{query}'")
+                
+                for item in product_items[:MAX_PRODUCTS_PER_SEARCH]:
+                    parsed = parse_newegg_product(item, product_type, generation, expected_cap)
+                    if parsed:
+                        # Generate unique ID
+                        product_id = generate_product_id(
+                            parsed["productName"], 
+                            "Newegg Canada", 
+                            expected_cap if expected_cap else 0, 
+                            product_type
+                        )
+                        
+                        products.append({
+                            "id": product_id,
+                            "category": parsed["category"],
+                            "productName": parsed["productName"],
+                            "brand": parsed["brand"],
+                            "retailer": "Newegg Canada",
+                            "price": parsed["price"],
+                            "currency": "CAD",
+                            "url": parsed["url"],
+                            "source": "newegg-direct",
+                            "verifiedAt": datetime.now(timezone.utc).isoformat()
+                        })
+                        print(f"  → {parsed['productName'][:50]}... @ ${parsed['price']}")
                 
         except HTTPError as e:
             if e.code in [403, 429, 503]:
-                print(f"[Newegg] Blocked or rate-limited ({e.code})")
+                print(f"[Newegg] Blocked or rate-limited ({e.code}) - stopping collection")
                 break
-            print(f"[Newegg] HTTP Error {e.code}")
+            print(f"[Newegg] HTTP Error {e.code} for '{query}'")
+        except URLError as e:
+            print(f"[Newegg] URL Error: {e.reason}")
+            break
         except Exception as e:
-            print(f"[Newegg] Error: {str(e)}")
+            print(f"[Newegg] Error searching '{query}': {str(e)}")
     
+    print(f"\n[Newegg] Total products collected: {len(products)}")
     return products
 
 # =============================================================================

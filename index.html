@@ -4513,7 +4513,7 @@
         { name:"PC-Canada", off:0.04, url:"https://www.pc-canada.com/catalog?search={q}" }
       ];
       var RAM_DATA_URL = "ram-prices.json";
-      var RAM_REFRESH_MS = 12 * 60 * 60 * 1000; // refresh baseline every 12 hours
+      var RAM_REFRESH_MS = 7 * 24 * 60 * 60 * 1000; // refresh baseline every 7 days (weekly)
       var ramState = { type:"ddr5", cap:32 };
       var ramMarket = {};
       function buildRamMarket(kits) {
@@ -4525,7 +4525,7 @@
             for (var d = 0; d < 14; d++) { p = p * (1 + (Math.random() - 0.42) * 0.035); history.push(Math.round(p)); }
             var cur = history[history.length - 1];
             var retailers = RETAILERS.map(function(r){ return { name:r.name, url:r.url, price: Math.round(cur * (1 + r.off + (Math.random() - 0.5) * 0.01)) }; }).sort(function(a,b){ return a.price - b.price; });
-            ramMarket[type][cap] = { history:history, cur:cur, high:Math.round(Math.max.apply(null, history)), low:Math.round(Math.min.apply(null, history)), prev:history[0], retailers:retailers, updated:Date.now() };
+            ramMarket[type][cap] = { history:history, cur:cur, high:Math.round(Math.max.apply(null, history)), low:Math.round(Math.min.apply(null, history)), prev:history[0], retailers:retailers, updated:Date.now(), source:"simulated" };
           });
         });
       }
@@ -4541,6 +4541,46 @@
           return res.ok ? res.json() : null;
         }).then(function (data) {
           if (data) {
+            // Check for real data from _winners
+            var hasRealData = data._winners && Object.keys(data._winners).length > 0;
+            
+            if (hasRealData) {
+              // Build market data using real winner info
+              Object.keys(data._winners).forEach(function(cat) {
+                var w = data._winners[cat];
+                var parts = cat.split("-");
+                var type = parts[0];
+                var genOrCap = parts[1];
+                var cap = parseInt(parts[2], 10);
+                
+                if (type === "ram") {
+                  var gen = genOrCap;
+                  if (!ramMarket[gen]) ramMarket[gen] = {};
+                  if (!ramMarket[gen][cap]) {
+                    ramMarket[gen][cap] = { history:[w.price], cur:w.price, high:w.price, low:w.price, prev:w.price, retailers:[], updated:Date.now(), productName:w.productName, retailer:w.retailer, url:w.url, source:w.source, verifiedAt:w.verifiedAt };
+                  } else {
+                    ramMarket[gen][cap].cur = w.price;
+                    ramMarket[gen][cap].productName = w.productName;
+                    ramMarket[gen][cap].retailer = w.retailer;
+                    ramMarket[gen][cap].url = w.url;
+                    ramMarket[gen][cap].source = w.source;
+                    ramMarket[gen][cap].verifiedAt = w.verifiedAt;
+                  }
+                } else if (type === "ssd") {
+                  if (!ssdMarket[cap]) {
+                    ssdMarket[cap] = { history:[w.price], cur:w.price, high:w.price, low:w.price, prev:w.price, retailers:[], updated:Date.now(), productName:w.productName, retailer:w.retailer, url:w.url, source:w.source, verifiedAt:w.verifiedAt };
+                  } else {
+                    ssdMarket[cap].cur = w.price;
+                    ssdMarket[cap].productName = w.productName;
+                    ssdMarket[cap].retailer = w.retailer;
+                    ssdMarket[cap].url = w.url;
+                    ssdMarket[cap].source = w.source;
+                    ssdMarket[cap].verifiedAt = w.verifiedAt;
+                  }
+                }
+              });
+            }
+            
             if (data.kits) buildRamMarket(data.kits);
             if (data.ssd) buildSsdMarket(data.ssd);
             try { localStorage.setItem("specwise-ram-cache", JSON.stringify({ kits: data.kits, ssd: data.ssd, ts: Date.now() })); } catch (e) {}
@@ -4590,28 +4630,19 @@
           "<p class=\"eyebrow eyebrow-accent\">" + type.toUpperCase() + " · " + ramState.cap + " GB kit</p>" +
           "<div class=\"ram-price\">" + cad(sku.cur) + "<span class=\"unit\">CA$" + per + " / GB</span></div>" +
           "<div class=\"ram-change " + (up ? "price-up" : "price-down") + "\">" + (up ? "↑" : "↓") + " " + (up ? "+" : "") + changePct.toFixed(1) + "% <span style=\"color:var(--muted);font-weight:400;\">over 14 days</span></div>" +
-          "<div class=\"ram-spark\" style=\"color:" + (up ? "var(--danger)" : "var(--success)") + ";\">" + sparklineSVG(sku.history, 320, 96) + "</div>" +
+          "<div class=\"ram-spark\" style=\"color:" + (up ? "var(--danger)") + ";\">" + sparklineSVG(sku.history, 320, 96) + "</div>" +
           "<div class=\"ram-range\"><div><div class=\"k\">14-day low</div><div class=\"v\">" + cad(sku.low) + "</div></div><div><div class=\"k\">14-day high</div><div class=\"v\">" + cad(sku.high) + "</div></div></div>" +
-          "<div class=\"retailer-list\"><h4 style=\"font-size:12px;font-family:var(--font-mono);text-transform:uppercase;letter-spacing:0.05em;color:var(--muted);margin:0 0 var(--space-2);\">Lowest price by retailer</h4>" +
-            sku.retailers.map(function(r, i){ var q = encodeURIComponent(ramState.cap + "GB " + type.toUpperCase()); var href = r.url.replace("{q}", q); var linkHtml = "<a class=\"rlink\" href=\"" + href + "\" target=\"_blank\" rel=\"noopener noreferrer\" title=\"" + href + "\">Shop ↗</a>"; return "<div class=\"retailer-row\"><span class=\"rname\">" + r.name + (i === 0 ? " <span class=\"best\">Lowest</span>" : "") + "</span><span class=\"rright\"><span class=\"rprice\">" + cad(r.price) + "</span>" + linkHtml + "</span></div>"; }).join("") +
+          "<div class=\"retailer-list\"><h4 style=\"font-size:12px;font-family:var(--font-mono);text-transform:uppercase;letter-spacing:0.05em;color:var(--muted);margin:0 0 var(--space-2);\">Best Price Found</h4>" +
+            (sku.productName ? "<div class=\"retailer-row\"><span class=\"rname\">" + sku.productName + "</span></div>" : "") +
+            (sku.retailer ? "<div class=\"retailer-row\"><span class=\"rname\">" + sku.retailer + " <span class=\"best\">Verified</span></span>" + (sku.url ? "<span class=\"rright\"><a class=\"rlink\" href=\"" + sku.url + "\" target=\"_blank\" rel=\"noopener noreferrer\">Shop ↗</a></span>" : "") + "</div>" : "") +
+            (sku.source && sku.source !== "simulated" ? "<div class=\"meta\" style=\"margin-top:8px;font-size:11px;color:var(--muted);\">Source: " + sku.source + " · Verified: " + new Date(sku.verifiedAt).toLocaleDateString() + "</div>" : "") +
           "</div>";
-        document.getElementById("ram-updated").textContent = "updated " + new Date(sku.updated).toLocaleTimeString();
+        document.getElementById("ram-updated").textContent = "Last verified " + (sku.verifiedAt ? new Date(sku.verifiedAt).toLocaleDateString() : new Date(sku.updated).toLocaleDateString());
       }
       function tickRamMarket() {
-        var sku = ramMarket[ramState.type][ramState.cap];
-        if (!sku) return;
-        sku.cur = Math.max(10, Math.round(sku.cur * (1 + (Math.random() - 0.5) * 0.008)));
-        sku.history.push(sku.cur); sku.history.shift();
-        sku.high = Math.max(sku.high, sku.cur);
-        sku.low = Math.min(sku.low, sku.cur);
-        sku.retailers.forEach(function(r){
-          var off = 0;
-          for (var k = 0; k < RETAILERS.length; k++) { if (RETAILERS[k].name === r.name) off = RETAILERS[k].off; }
-          r.price = Math.round(sku.cur * (1 + off + (Math.random() - 0.5) * 0.01));
-        });
-        sku.retailers.sort(function(a,b){ return a.price - b.price; });
-        sku.updated = Date.now();
-        if (marketKind === "ram") renderRamMarket();
+        // Disabled: prices now come from weekly automated updates, not simulated fluctuations
+        // Prices only update when GitHub Actions runs collect_prices.py
+        return;
       }
       function wireRamMarket() {
         var tabs = document.querySelectorAll("#ram-type .db-tab");
@@ -4660,7 +4691,7 @@
           for (var d = 0; d < 14; d++) { p = p * (1 + (Math.random() - 0.42) * 0.035); history.push(Math.round(p)); }
           var cur = history[history.length - 1];
           var retailers = RETAILERS.map(function(r){ return { name:r.name, url:r.url, price: Math.round(cur * (1 + r.off + (Math.random() - 0.5) * 0.01)) }; }).sort(function(a,b){ return a.price - b.price; });
-          ssdMarket[cap] = { history:history, cur:cur, high:Math.round(Math.max.apply(null, history)), low:Math.round(Math.min.apply(null, history)), prev:history[0], retailers:retailers, updated:Date.now() };
+          ssdMarket[cap] = { history:history, cur:cur, high:Math.round(Math.max.apply(null, history)), low:Math.round(Math.min.apply(null, history)), prev:history[0], retailers:retailers, updated:Date.now(), source:"simulated" };
         });
       }
       function initSsdMarket() { buildSsdMarket(); }
@@ -4684,27 +4715,19 @@
           "<p class=\"eyebrow eyebrow-accent\">M.2 NVMe · " + ssdCapLabel(ssdState.cap) + "</p>" +
           "<div class=\"ram-price\">" + cad(sku.cur) + "<span class=\"unit\">CA$" + per + " / GB</span></div>" +
           "<div class=\"ram-change " + (up ? "price-up" : "price-down") + "\">" + (up ? "↑" : "↓") + " " + (up ? "+" : "") + changePct.toFixed(1) + "% <span style=\"color:var(--muted);font-weight:400;\">over 14 days</span></div>" +
-          "<div class=\"ram-spark\" style=\"color:" + (up ? "var(--danger)" : "var(--success)") + ";\">" + sparklineSVG(sku.history, 320, 96) + "</div>" +
+          "<div class=\"ram-spark\" style=\"color:" + (up ? "var(--danger)") + ";\">" + sparklineSVG(sku.history, 320, 96) + "</div>" +
           "<div class=\"ram-range\"><div><div class=\"k\">14-day low</div><div class=\"v\">" + cad(sku.low) + "</div></div><div><div class=\"k\">14-day high</div><div class=\"v\">" + cad(sku.high) + "</div></div></div>" +
-          "<div class=\"retailer-list\"><h4 style=\"font-size:12px;font-family:var(--font-mono);text-transform:uppercase;letter-spacing:0.05em;color:var(--muted);margin:0 0 var(--space-2);\">Lowest price by retailer</h4>" +
-            sku.retailers.map(function(r, i){ var q = encodeURIComponent(ssdCapLabel(ssdState.cap) + " NVMe SSD"); var href = r.url.replace("{q}", q); var linkHtml = "<a class=\"rlink\" href=\"" + href + "\" target=\"_blank\" rel=\"noopener noreferrer\" title=\"" + href + "\">Shop ↗</a>"; return "<div class=\"retailer-row\"><span class=\"rname\">" + r.name + (i === 0 ? " <span class=\"best\">Lowest</span>" : "") + "</span><span class=\"rright\"><span class=\"rprice\">" + cad(r.price) + "</span>" + linkHtml + "</span></div>"; }).join("") +
+          "<div class=\"retailer-list\"><h4 style=\"font-size:12px;font-family:var(--font-mono);text-transform:uppercase;letter-spacing:0.05em;color:var(--muted);margin:0 0 var(--space-2);\">Best Price Found</h4>" +
+            (sku.productName ? "<div class=\"retailer-row\"><span class=\"rname\">" + sku.productName + "</span></div>" : "") +
+            (sku.retailer ? "<div class=\"retailer-row\"><span class=\"rname\">" + sku.retailer + " <span class=\"best\">Verified</span></span>" + (sku.url ? "<span class=\"rright\"><a class=\"rlink\" href=\"" + sku.url + "\" target=\"_blank\" rel=\"noopener noreferrer\">Shop ↗</a></span>" : "") + "</div>" : "") +
+            (sku.source && sku.source !== "simulated" ? "<div class=\"meta\" style=\"margin-top:8px;font-size:11px;color:var(--muted);\">Source: " + sku.source + " · Verified: " + new Date(sku.verifiedAt).toLocaleDateString() + "</div>" : "") +
           "</div>";
-        document.getElementById("ram-updated").textContent = "updated " + new Date(sku.updated).toLocaleTimeString();
+        document.getElementById("ram-updated").textContent = "Last verified " + (sku.verifiedAt ? new Date(sku.verifiedAt).toLocaleDateString() : new Date(sku.updated).toLocaleDateString());
       }
       function tickSsdMarket() {
-        var sku = ssdMarket[ssdState.cap];
-        if (!sku) return;
-        sku.cur = Math.max(10, Math.round(sku.cur * (1 + (Math.random() - 0.5) * 0.008)));
-        sku.history.push(sku.cur); sku.history.shift();
-        sku.high = Math.max(sku.high, sku.cur); sku.low = Math.min(sku.low, sku.cur);
-        sku.retailers.forEach(function(r){
-          var off = 0;
-          for (var k = 0; k < RETAILERS.length; k++) { if (RETAILERS[k].name === r.name) off = RETAILERS[k].off; }
-          r.price = Math.round(sku.cur * (1 + off + (Math.random() - 0.5) * 0.01));
-        });
-        sku.retailers.sort(function(a,b){ return a.price - b.price; });
-        sku.updated = Date.now();
-        if (marketKind === "ssd") renderSsdMarket();
+        // Disabled: prices now come from weekly automated updates, not simulated fluctuations
+        // Prices only update when GitHub Actions runs collect_prices.py
+        return;
       }
       function renderMarket() { if (marketKind === "ssd") renderSsdMarket(); else renderRamMarket(); }
       function tickMarket() { tickRamMarket(); tickSsdMarket(); }
@@ -4783,7 +4806,8 @@
         initSsdMarket();
         renderMarket();
         maybeRefreshMarket();
-        setInterval(tickMarket, 5000);
+        // Disabled: price fluctuations removed - prices only update via weekly GitHub Actions
+        // setInterval(tickMarket, 5000);
         showView("home");
       }
 

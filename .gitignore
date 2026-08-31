@@ -1,39 +1,30 @@
 ```
-# Environment variables
+# Logs and temp files
+*.log
+*.tmp
+
+# Environment
 .env
 .env.local
 *.env.*
 
-# Python specific
+# Dependencies
+node_modules/
 __pycache__/
 *.pyc
-*.pyo
-*.pyd
-.Python
-*.so
-*.egg-info/
-.eggs/
-
-# Dependencies
-.venv/
-venv/
-env/
-ENV/
+.pytest_cache/
+.mypy_cache/
 
 # Build artifacts
 dist/
 build/
-*.egg
-*.whl
-*.pyc
-*.pyo
-*.pyd
-*.so
+target/
 
-# Logs
-*.log
+# Editors
+.vscode/
+.idea/
 
-# OS generated files
+# System
 .DS_Store
 Thumbs.db
 ```
