@@ -4594,22 +4594,7 @@
           ramMarket[internalType] = {};
           Object.keys(jsonData[typeKey]).forEach(function(capKey){
             var entry = jsonData[typeKey][capKey];
-            // Validate price - must be a positive number
-            var price = null;
-            if (typeof entry.lowestPrice === 'number' && entry.lowestPrice > 0) {
-              price = entry.lowestPrice;
-            } else if (typeof entry.avgPrice === 'number' && entry.avgPrice > 0) {
-              price = entry.avgPrice;
-            }
-            // Skip entries with invalid/zero/null prices - preserve previous data if available
-            if (!price || price <= 0) {
-              // Try to preserve existing market data if we have it
-              var capNum = capKey.replace("GB","");
-              if (ramMarket[internalType] && ramMarket[internalType][capNum] && ramMarket[internalType][capNum].cur > 0) {
-                return; // Keep existing data
-              }
-              return; // Skip this entry entirely
-            }
+            var price = entry.lowestPrice || entry.avgPrice || 0;
             var history = [], p = price * (0.95 + Math.random() * 0.10);
             for (var d = 0; d < 14; d++) { p = p * (1 + (Math.random() - 0.42) * 0.02); history.push(Math.round(p)); }
             history[history.length - 1] = price;
@@ -4617,9 +4602,7 @@
               var retailerPrice = Math.round(price * (1 + r.off + (Math.random() - 0.5) * 0.01));
               return { name:r.name, url:r.url, price: retailerPrice }; 
             }).sort(function(a,b){ return a.price - b.price; });
-            // Keep capacity key as-is (e.g., "16GB" -> use "16" by removing GB)
-            var capNum = capKey.replace("GB","");
-            ramMarket[internalType][capNum] = { 
+            ramMarket[internalType][capKey.replace("GB","")] = { 
               history: history, 
               cur: price, 
               high: Math.round(price * 1.08), 
@@ -4650,17 +4633,12 @@
           return res.ok ? res.json() : null;
         }).then(function (data) {
           if (data) {
-            // Only update if we have valid data - preserve existing market data otherwise
-            if (data.ram) {
-              buildRamMarketFromJson(data.ram);
-            }
-            if (data.ssd) {
-              buildSsdMarketFromJson(data.ssd);
-            }
+            if (data.ram) buildRamMarketFromJson(data.ram);
+            if (data.ssd) buildSsdMarketFromJson(data.ssd);
             try { localStorage.setItem("specwise-ram-cache", JSON.stringify({ kits: data.ram, ssd: data.ssd, ts: Date.now() })); } catch (e) {}
             renderMarket();
           }
-        }).catch(function () { /* keep inline seed data on fetch failure */ });
+        }).catch(function () { /* keep inline seed */ });
       }
       function sparklineSVG(points, w, h) {
         var min = Math.min.apply(null, points), max = Math.max.apply(null, points), range = (max - min) || 1;
@@ -4689,11 +4667,6 @@
         var html = "<table class=\"ram-table\"><thead><tr><th>Kit</th><th>Lowest</th><th>CA$/GB</th><th>14-day range</th></tr></thead><tbody>";
         caps.forEach(function(cap){
           var sku = ramMarket[type][cap];
-          // Skip if no data for this capacity (should not happen, but safety check)
-          if (!sku || !sku.cur || sku.cur <= 0) {
-            // Use fallback from RAM_BASE if market data is missing
-            sku = { cur: RAM_BASE[type][cap] || 299, low: RAM_BASE[type][cap] || 299, high: Math.round((RAM_BASE[type][cap] || 299) * 1.08), history: [RAM_BASE[type][cap] || 299], prev: RAM_BASE[type][cap] || 299, retailers: [] };
-          }
           var per = (sku.cur / parseInt(cap, 10)).toFixed(2);
           var active = String(cap) === String(ramState.cap);
           html += "<tr data-cap=\"" + cap + "\"" + (active ? " class=\"active\"" : "") + "><td class=\"ram-cap-label\">" + cap + " GB</td><td class=\"num\">" + cad(sku.cur) + "</td><td class=\"num\">CA$" + per + "</td><td class=\"num\" style=\"color:var(--muted);\">" + cad(sku.low) + " – " + cad(sku.high) + "</td></tr>";
@@ -4701,10 +4674,6 @@
         html += "</tbody></table>";
         document.getElementById("ram-overview").innerHTML = html;
         var sku = ramMarket[type][ramState.cap];
-        // Fallback if current selection has no data
-        if (!sku || !sku.cur || sku.cur <= 0) {
-          sku = { cur: RAM_BASE[type][ramState.cap] || 299, low: RAM_BASE[type][ramState.cap] || 299, high: Math.round((RAM_BASE[type][ramState.cap] || 299) * 1.08), history: [RAM_BASE[type][ramState.cap] || 299], prev: RAM_BASE[type][ramState.cap] || 299, retailers: [], updated: Date.now() };
-        }
         var change = sku.cur - sku.prev;
         var changePct = sku.prev ? (change / sku.prev) * 100 : 0;
         var up = change >= 0;
@@ -4775,61 +4744,6 @@
       var ssdMarket = {};
       var marketKind = "ram";
       function ssdCapLabel(cap) { return cap >= 1024 ? (cap / 1024) + " TB" : cap + " GB"; }
-      
-      function buildSsdMarketFromJson(ssdData) {
-        // New function: consumes the new ram-prices.json SSD format directly
-        // ssdData structure: { "512GB": { lowestPrice: 139, ... }, "1TB": {...} }
-        Object.keys(ssdData).forEach(function(capKey){
-          var entry = ssdData[capKey];
-          // Validate price - must be a positive number
-          var price = null;
-          if (typeof entry.lowestPrice === 'number' && entry.lowestPrice > 0) {
-            price = entry.lowestPrice;
-          } else if (typeof entry.avgPrice === 'number' && entry.avgPrice > 0) {
-            price = entry.avgPrice;
-          }
-          // Skip entries with invalid/zero/null prices - preserve previous data if available
-          if (!price || price <= 0) {
-            // Try to preserve existing market data if we have it
-            var capNum;
-            if (capKey.indexOf("TB") >= 0) {
-              capNum = parseInt(capKey.replace("TB",""), 10) * 1024;
-            } else {
-              capNum = parseInt(capKey.replace("GB",""), 10);
-            }
-            if (ssdMarket[capNum] && ssdMarket[capNum].cur > 0) {
-              return; // Keep existing data
-            }
-            return; // Skip this entry entirely
-          }
-          var history = [], p = price * (0.95 + Math.random() * 0.10);
-          for (var d = 0; d < 14; d++) { p = p * (1 + (Math.random() - 0.42) * 0.02); history.push(Math.round(p)); }
-          history[history.length - 1] = price;
-          var retailers = RETAILERS.map(function(r){ 
-            var retailerPrice = Math.round(price * (1 + r.off + (Math.random() - 0.5) * 0.01));
-            return { name:r.name, url:r.url, price: retailerPrice }; 
-          }).sort(function(a,b){ return a.price - b.price; });
-          // Convert capacity key to numeric (e.g., "512GB" -> 512, "1TB" -> 1024)
-          var capNum;
-          if (capKey.indexOf("TB") >= 0) {
-            capNum = parseInt(capKey.replace("TB",""), 10) * 1024;
-          } else {
-            capNum = parseInt(capKey.replace("GB",""), 10);
-          }
-          ssdMarket[capNum] = { 
-            history: history, 
-            cur: price, 
-            high: Math.round(price * 1.08), 
-            low: Math.round(price * 0.92), 
-            prev: history[0], 
-            retailers: retailers, 
-            updated: Date.now(),
-            sourceStatus: entry.sourceStatus || "cached",
-            confidence: entry.confidence || 0.95
-          };
-        });
-      }
-      
       function buildSsdMarket(ssd) {
         ssd = ssd || SSD_BASE;
         Object.keys(ssd).forEach(function(cap){
@@ -4847,11 +4761,6 @@
         var html = "<table class=\"ram-table\"><thead><tr><th>Drive</th><th>Lowest</th><th>CA$/GB</th><th>14-day range</th></tr></thead><tbody>";
         caps.forEach(function(cap){
           var sku = ssdMarket[cap];
-          // Skip if no data for this capacity (should not happen, but safety check)
-          if (!sku || !sku.cur || sku.cur <= 0) {
-            // Use fallback from SSD_BASE if market data is missing
-            sku = { cur: SSD_BASE[cap] || 199, low: SSD_BASE[cap] || 199, high: Math.round((SSD_BASE[cap] || 199) * 1.08), history: [SSD_BASE[cap] || 199], prev: SSD_BASE[cap] || 199, retailers: [] };
-          }
           var per = (sku.cur / parseInt(cap, 10)).toFixed(2);
           var active = String(cap) === String(ssdState.cap);
           html += "<tr data-ssd-cap=\"" + cap + "\"" + (active ? " class=\"active\"" : "") + "><td class=\"ram-cap-label\">" + ssdCapLabel(cap) + "</td><td class=\"num\">" + cad(sku.cur) + "</td><td class=\"num\">CA$" + per + "</td><td class=\"num\" style=\"color:var(--muted);\">" + cad(sku.low) + " – " + cad(sku.high) + "</td></tr>";
@@ -4859,10 +4768,6 @@
         html += "</tbody></table>";
         document.getElementById("ram-overview").innerHTML = html;
         var sku = ssdMarket[ssdState.cap];
-        // Fallback if current selection has no data
-        if (!sku || !sku.cur || sku.cur <= 0) {
-          sku = { cur: SSD_BASE[ssdState.cap] || 199, low: SSD_BASE[ssdState.cap] || 199, high: Math.round((SSD_BASE[ssdState.cap] || 199) * 1.08), history: [SSD_BASE[ssdState.cap] || 199], prev: SSD_BASE[ssdState.cap] || 199, retailers: [], updated: Date.now() };
-        }
         var change = sku.cur - sku.prev;
         var changePct = sku.prev ? (change / sku.prev) * 100 : 0;
         var up = change >= 0;
