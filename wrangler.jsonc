@@ -1,9 +1,14 @@
 {
-  "$schema": "node_modules/wrangler/config-schema.json",
+  "$schema": "./node_modules/wrangler/config-schema.json",
   "name": "specwise",
   "compatibility_date": "2026-08-28",
   "assets": {
-    "directory": "."
+    "directory": ".",
+    "exclude": [
+      "node_modules/**",
+      ".git/**",
+      ".wrangler/**"
+    ]
   },
   "observability": {
     "enabled": true
