@@ -1790,7 +1790,8 @@
             <h4 style="font-size: 14px; margin: var(--space-5) 0 var(--space-2); color: var(--canvas-dark-fg); font-family: var(--font-mono); text-transform: uppercase; letter-spacing: 0.06em;">How many Macs for the big models</h4>
             <ul class="ai-cap-list" style="margin-bottom: var(--space-4);">
               <li><span class="mark mark-ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>DeepSeek V4 Flash (~150 GB) → 2× 128 GB, or 1× 256 GB Ultra</li>
-              <li><span class="mark mark-ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>GLM-5.2 (~245 GB) → 2× 128 GB, or 1× 256 GB Ultra</li>
+              <li><span class="mark mark-ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>GLM-5.3 (~550 GB) → 2× 256 GB Ultra, or ~5× 128 GB</li>
+              <li><span class="mark mark-ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span>GLM-5.3-Flash (~240 GB) → 2× 128 GB, or 1× 256 GB Ultra</li>
               <li><span class="mark mark-warn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4M12 17h.01"/><circle cx="12" cy="12" r="9"/></svg></span>Kimi K3 (~700 GB) → 3× 256 GB, or ~6× 128 GB</li>
               <li><span class="mark mark-warn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4M12 17h.01"/><circle cx="12" cy="12" r="9"/></svg></span>DeepSeek V4 Pro (~800 GB) → 2× 512 GB Ultra, or ~7× 128 GB</li>
             </ul>
@@ -2338,7 +2339,8 @@
         { name:"Gemma 4 26B-A4B",    vram:16,  note:"MoE · 3.8B active · Q4 · sparse", src:"Google", params:26, q4vram:14, q6vram:18, q8vram:22 },
         { name:"Gemma 4 31B",        vram:20,  note:"dense · Q4_K_M", src:"Google", params:31, q4vram:18, q6vram:22, q8vram:28 },
         { name:"DeepSeek V4 Flash",  vram:150, note:"284B MoE · 13B active · Q4 · heavy context", src:"DeepSeek", params:284, q4vram:120, q6vram:160, q8vram:200 },
-        { name:"GLM-5.2",            vram:245, note:"744B MoE · 40B active · 2-bit aggressive", src:"Z.ai", params:744, q4vram:200, q6vram:280, q8vram:400 },
+        { name:"GLM-5.3",            vram:550, note:"~755B MoE · Zhipu's latest flagship · Q4_K_M", src:"Z.ai/Ollama", params:755, q4vram:450, q6vram:580, q8vram:750 },
+        { name:"GLM-5.3-Flash",      vram:240, note:"~328B MoE · speed-optimized · low latency", src:"Z.ai/Ollama", params:328, q4vram:200, q6vram:260, q8vram:340 },
         { name:"DeepSeek V4 Pro",    vram:800, note:"1.6T MoE · 49B active · Q4 · max context", src:"DeepSeek", params:1600, q4vram:600, q6vram:900, q8vram:1300 },
         { name:"Kimi K3",            vram:700, note:"2.8T MoE · 2-bit · extreme context (256K+)", src:"Moonshot", params:2800, q4vram:500, q6vram:800, q8vram:1200 },
         { name:"Llama 3.1 8B",       vram:8,   note:"8B dense · Q4_K_M sweet spot · 4-8K context", src:"Meta", params:8, q4vram:6, q6vram:8, q8vram:10 },
@@ -3605,7 +3607,7 @@
         if (g.fp8 >= 300) ex.push("Fast inference (" + g.fp8 + " FP8 TFLOPS)");
         if (totalVram < 16) lm.push("FLUX.2 [klein] 9B needs ~20 GB, Qwen-Image Edit ~14 GB");
         if (totalVram < 40) lm.push("MiniMax H3 needs ~40 GB, Wan 2.2 A14B ~48 GB");
-        if (totalVram < 150) lm.push("Frontier LLMs need far more — DeepSeek V4 Flash ~150 GB, GLM-5.2 ~245 GB, Kimi K3 ~700 GB, DeepSeek V4 Pro ~800 GB");
+        if (totalVram < 150) lm.push("Frontier LLMs need far more — DeepSeek V4 Flash ~150 GB, GLM-5.3 ~550 GB, GLM-5.3-Flash ~240 GB, Kimi K3 ~700 GB, DeepSeek V4 Pro ~800 GB");
         lm.push("Training still wants more GPUs or cloud");
         document.getElementById("ai-excellent").innerHTML = ex.map(function(x){ return "<li><span class=\"mark mark-ok\">"+OK_SVG+"</span>"+x+"</li>"; }).join("");
         document.getElementById("ai-limits").innerHTML = lm.map(function(x){ return "<li><span class=\"mark mark-warn\">"+WARN_SVG+"</span>"+x+"</li>"; }).join("");
