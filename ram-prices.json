@@ -2,7 +2,7 @@
   "schemaVersion": 2,
   "currency": "CAD",
   "taxIncluded": false,
-  "lastUpdated": "2026-10-28T03:32:11.274256Z",
+  "lastUpdated": "2026-10-29T03:53:44.132846Z",
   "refreshIntervalHours": 24,
   "sources": [
     "Amazon.ca",
@@ -31,7 +31,7 @@
         "kit": "2x8GB",
         "speed": "3200MHz",
         "lastVerified": "2026-08-30T20:39:54.805Z",
-        "lastAttempted": "2026-10-28T03:32:11.274287Z",
+        "lastAttempted": "2026-10-29T03:53:44.132877Z",
         "sourceStatus": "cached",
         "confidence": 0.95
       },
@@ -46,7 +46,7 @@
         "kit": "2x16GB",
         "speed": "3200MHz",
         "lastVerified": "2026-08-30T20:39:54.805Z",
-        "lastAttempted": "2026-10-28T03:32:11.274294Z",
+        "lastAttempted": "2026-10-29T03:53:44.132884Z",
         "sourceStatus": "cached",
         "confidence": 0.95
       },
@@ -61,7 +61,7 @@
         "kit": "2x32GB",
         "speed": "3200MHz",
         "lastVerified": "2026-08-30T20:39:54.805Z",
-        "lastAttempted": "2026-10-28T03:32:11.274298Z",
+        "lastAttempted": "2026-10-29T03:53:44.132888Z",
         "sourceStatus": "cached",
         "confidence": 0.95
       },
@@ -76,7 +76,7 @@
         "kit": "2x64GB",
         "speed": "3200MHz",
         "lastVerified": "2026-08-30T20:39:54.805Z",
-        "lastAttempted": "2026-10-28T03:32:11.274302Z",
+        "lastAttempted": "2026-10-29T03:53:44.132892Z",
         "sourceStatus": "cached",
         "confidence": 0.95
       }
@@ -93,7 +93,7 @@
         "kit": "2x8GB",
         "speed": "5600MHz",
         "lastVerified": "2026-08-30T20:39:54.805Z",
-        "lastAttempted": "2026-10-28T03:32:11.274306Z",
+        "lastAttempted": "2026-10-29T03:53:44.132899Z",
         "sourceStatus": "cached",
         "confidence": 0.95
       },
@@ -108,7 +108,7 @@
         "kit": "2x16GB",
         "speed": "5600MHz",
         "lastVerified": "2026-08-30T20:39:54.805Z",
-        "lastAttempted": "2026-10-28T03:32:11.274309Z",
+        "lastAttempted": "2026-10-29T03:53:44.132903Z",
         "sourceStatus": "cached",
         "confidence": 0.95
       },
@@ -123,7 +123,7 @@
         "kit": "2x24GB",
         "speed": "5600MHz",
         "lastVerified": "2026-08-30T20:39:54.805Z",
-        "lastAttempted": "2026-10-28T03:32:11.274313Z",
+        "lastAttempted": "2026-10-29T03:53:44.132906Z",
         "sourceStatus": "cached",
         "confidence": 0.95
       },
@@ -138,7 +138,7 @@
         "kit": "2x32GB",
         "speed": "5600MHz",
         "lastVerified": "2026-08-30T20:39:54.805Z",
-        "lastAttempted": "2026-10-28T03:32:11.274319Z",
+        "lastAttempted": "2026-10-29T03:53:44.132938Z",
         "sourceStatus": "cached",
         "confidence": 0.95
       },
@@ -153,7 +153,7 @@
         "kit": "2x48GB",
         "speed": "5600MHz",
         "lastVerified": "2026-08-30T20:39:54.805Z",
-        "lastAttempted": "2026-10-28T03:32:11.274324Z",
+        "lastAttempted": "2026-10-29T03:53:44.132945Z",
         "sourceStatus": "cached",
         "confidence": 0.95
       },
@@ -168,7 +168,7 @@
         "kit": "2x64GB",
         "speed": "5600MHz",
         "lastVerified": "2026-08-30T20:39:54.805Z",
-        "lastAttempted": "2026-10-28T03:32:11.274328Z",
+        "lastAttempted": "2026-10-29T03:53:44.132950Z",
         "sourceStatus": "cached",
         "confidence": 0.95
       }
@@ -184,7 +184,7 @@
       "interface": "NVMe",
       "generation": "Gen4",
       "lastVerified": "2026-08-30T20:39:54.805Z",
-      "lastAttempted": "2026-10-28T03:32:11.274332Z",
+      "lastAttempted": "2026-10-29T03:53:44.132955Z",
       "sourceStatus": "cached",
       "confidence": 0.95
     },
@@ -197,7 +197,7 @@
       "interface": "NVMe",
       "generation": "Gen4",
       "lastVerified": "2026-08-30T20:39:54.805Z",
-      "lastAttempted": "2026-10-28T03:32:11.274335Z",
+      "lastAttempted": "2026-10-29T03:53:44.132961Z",
       "sourceStatus": "cached",
       "confidence": 0.95
     },
@@ -210,7 +210,7 @@
       "interface": "NVMe",
       "generation": "Gen4",
       "lastVerified": "2026-08-30T20:39:54.805Z",
-      "lastAttempted": "2026-10-28T03:32:11.274338Z",
+      "lastAttempted": "2026-10-29T03:53:44.132965Z",
       "sourceStatus": "cached",
       "confidence": 0.95
     },
@@ -223,7 +223,7 @@
       "interface": "NVMe",
       "generation": "Gen4",
       "lastVerified": "2026-08-30T20:39:54.805Z",
-      "lastAttempted": "2026-10-28T03:32:11.274341Z",
+      "lastAttempted": "2026-10-29T03:53:44.132968Z",
       "sourceStatus": "cached",
       "confidence": 0.95
     },
@@ -236,7 +236,7 @@
       "interface": "NVMe",
       "generation": "Gen4",
       "lastVerified": "2026-08-30T20:39:54.805Z",
-      "lastAttempted": "2026-10-28T03:32:11.274347Z",
+      "lastAttempted": "2026-10-29T03:53:44.132972Z",
       "sourceStatus": "cached",
       "confidence": 0.95
     }
